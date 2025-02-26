@@ -1,6 +1,6 @@
-import Form from "../components/form"
+import Form from "../components/LoginForm"
 function Login() {
-    return <Form route="/token/" method ="login"/>
+    return <Form route="/token/"/>
 
 }
 

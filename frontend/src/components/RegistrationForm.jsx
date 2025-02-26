@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import LoadingIndicator from "./LoadingIndicator";
 import ASTUlogo from "../assets/images/ASTUlogo.jpg"
+import { Link } from "react-router-dom";
 
 const userTypes = {
     student: ["full_name", "email", "password", "confirm_password", "student_id", "department", "admission_year", "graduation_year", "phone_number"],
@@ -49,11 +50,15 @@ function RegisterForm() {
     const [fields, setFields] = useState(initialFields);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("student"); 
+    const [errorMessage, setErrorMessage] = useState(''); 
+    const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFields({ ...fields, [name]: value });
+        setErrorMessage('');  
+        setSuccessMessage(''); 
     };
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
@@ -79,9 +84,11 @@ function RegisterForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setErrorMessage(''); 
+        setSuccessMessage('');
 
         if (fields.password !== fields.confirm_password) {
-            alert("Passwords Mismatch.");
+            setErrorMessage("Passwords Mismatch.");
             setLoading(false);
             return;
         }
@@ -133,11 +140,34 @@ function RegisterForm() {
 
         try {
             const res = await users_API.post(endpoint, userData);
+            setSuccessMessage('Registration successful!');
             localStorage.setItem(ACCESS_TOKEN, res.data.access);
             localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
             navigate("/");
         } catch (error) {
-            alert(JSON.stringify(error.response ? error.response.data : error.message));
+            if (error.response) {
+                const errors = error.response.data;
+        
+                if (typeof errors === 'object') {
+                    // Check for a detail field directly
+                    if (errors.detail) {
+                        setErrorMessage(errors.detail);
+                    } else if (Array.isArray(errors.non_field_errors)) {
+                        setErrorMessage(errors.non_field_errors.join(", "));
+                    } else if (errors.user && Array.isArray(errors.user.email)) {
+                        setErrorMessage(errors.user.email[0]);
+                    }
+                    else {
+                        // If errors is an object with multiple keys, join the messages
+                        const errorMessages = Object.values(errors).flat().join(", ");
+                        setErrorMessage(errorMessages);
+                    }
+                } else {
+                    setErrorMessage('An unexpected error occurred.');
+                }
+            } else {
+                setErrorMessage('Network error. Please check your connection.');
+            }
         } finally {
             setLoading(false);
         }
@@ -180,7 +210,10 @@ function RegisterForm() {
         
             
             <form onSubmit={handleSubmit} className="form-container">
-            <h1>Register</h1>
+            <h1>Create Account</h1>
+            <h4 className="h4" style={{marginBottom: '1rem' }}>Already have an account? 
+            <Link to="/login" className="link-text">Sign In</Link>
+            </h4>
             <div className="tabs">
                 {Object.keys(userTypes).map(type => (
                     <button
@@ -653,6 +686,8 @@ function RegisterForm() {
                 />
 
                 {loading && <LoadingIndicator />}
+                {errorMessage && <div className="error-message">{errorMessage}</div>}
+                {successMessage && <div className="success-message">{successMessage}</div>}
                 <button className="form-button" type="submit">
                     Register
                 </button>

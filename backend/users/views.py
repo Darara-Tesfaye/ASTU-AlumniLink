@@ -5,11 +5,17 @@ from .serializers import StudentProfileSerializer, AlumniProfileSerializer, Staf
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 import pandas as pd
+import logging
+from rest_framework.views import APIView
 
 Student_mocked_Data = "users/Mocked_Data/Student_mocked_Data.xlsx"
 df = pd.read_excel(Student_mocked_Data, header=2)
 Alumni_mocked_Data = "users/Mocked_Data/Alumni_mocked_Data.xlsx" 
 alumni_df = pd.read_excel(Alumni_mocked_Data, header=0)
+
+Staff_mocked_Data ="users/Mocked_Data/Staff_mocked_Data.xlsx"
+staff_df=pd.read_excel(Staff_mocked_Data, header=5)
+# logging.error(f"{staff_df['Email']} and {[staff_df['Qualification']]}")  
 
 def is_user_AstuStudent(user_email, student_id):
     email_check = not df[df['Email'] == user_email].empty
@@ -20,6 +26,11 @@ def is_user_AstuAlumni(field_of_study, student_id):
     student_id_check = not alumni_df[alumni_df['Id Number'] == student_id].empty
     
     return field_of_study and student_id_check
+def is_user_AstuStaff(staff_email, qualification):
+    staff_email_exists = not staff_df[staff_df['Email'] == staff_email].empty
+    staff_qualification_exists = not staff_df[staff_df['Qualification'] == qualification].empty
+    return staff_qualification_exists and staff_email_exists
+
 
 class StudentProfileCreateView(generics.CreateAPIView):
     queryset = StudentProfile.objects.all()
@@ -27,8 +38,8 @@ class StudentProfileCreateView(generics.CreateAPIView):
     permission_classes = [AllowAny]  
 
     def create(self, request, *args, **kwargs):       
-        data = request.data.copy()    
-        user_data = {
+        data = request.data.copy()   
+        user_data = { 
             'email': data['user'].get('email'),
             'full_name': data['user'].get('full_name'),
             'usertype': data['user'].get('usertype'),
@@ -59,8 +70,7 @@ class StudentProfileCreateView(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         data['user'] = user_data
-        
-    
+   
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -120,11 +130,50 @@ class StaffProfileCreateView(generics.CreateAPIView):
     queryset = StaffProfile.objects.all()
     serializer_class = StaffProfileSerializer
     permission_classes = [AllowAny]
+    
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        logging.error(f"{data}")
+        user_data = {
+            'email': data['user'].get('email'),
+            'full_name': data['user'].get('full_name'),
+            'usertype': data['user'].get('usertype'),
+            'password': data['user'].get('password'),
+        }
+        
+        staff_email = user_data['email']
+        qualification = data.get('qualifications')
+       
+        if not is_user_AstuStaff(staff_email, qualification):
+            return Response(
+                {"detail": "User is not available in the mocked data"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
                           
 class CompanyCreateView(generics.CreateAPIView):
     queryset = CompanyProfile.objects.all()
     serializer_class = CompanyProfileSerializer
     permission_classes = [AllowAny]
+    
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        usertype = user.usertype  
+        return Response({
+            'email': user.email,
+            'usertype': usertype,
+        })
+        
+        
 # JWT Token Obtain Pair View
 class ObtainTokenPairView(TokenObtainPairView):
     pass

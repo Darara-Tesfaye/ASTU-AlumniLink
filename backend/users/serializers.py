@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import CustomUser, StudentProfile, AlumniProfile, StaffProfile, CompanyProfile
+import logging
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -37,27 +38,31 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-
+        errors = {}
         user_data = attrs.pop('user')
-        attrs['user'] = user_data  # Keep the user data for creation
+        attrs['user'] = user_data
 
         if attrs['graduation_year'] < attrs['admission_year']:
-            raise serializers.ValidationError({"graduation_year": "Graduation year must be after admission year."})
+            errors["graduation_year"] = "Graduation year must be after admission year."
         
         year_gap = attrs['graduation_year'] - attrs['admission_year']
         if year_gap < 4:
-            raise serializers.ValidationError({"graduation_year": "The minimum required years to complete the department is 4."})
+            errors["graduation_year"] = "The minimum required years to complete the department is 4."
         if year_gap > 7:
-            raise serializers.ValidationError({"graduation_year": "The maximum allowed difference between admission and graduation year is 7 years."})
+            errors["graduation_year"] = "The maximum allowed difference between admission and graduation year is 7 years."
 
         admission_year_last_two_digits = str(attrs['admission_year'])[-2:]
         student_id_last_two_digits = attrs['student_id'].split('/')[-1]  
         if student_id_last_two_digits != admission_year_last_two_digits:
-            raise serializers.ValidationError({"student_id": "Fill admission year by Ethiopian C."})
+            errors["student_id"] = "Fill admission year by Ethiopian C."
+
+        if errors:
+            raise serializers.ValidationError(errors)
 
         return attrs
 
     def create(self, validated_data):
+        logging.error(f"Error: {validated_data}")
         user_data = validated_data.pop('user')
         user = CustomUser.objects.create_user(**user_data) 
         student_profile = StudentProfile.objects.create(user=user, **validated_data)
@@ -147,6 +152,6 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        user = CustomUser.objects.create_user(**user_data)  # Create the user
+        user = CustomUser.objects.create_user(**user_data)  
         company_profile = CompanyProfile.objects.create(user=user, **validated_data)
         return company_profile
