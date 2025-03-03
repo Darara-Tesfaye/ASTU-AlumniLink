@@ -3,10 +3,10 @@ import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom"
 import Login from './pages/Login'
 import RegisterForm from "./components/RegistrationForm"
 import LandingPage from "./pages/LandingPage";
-import StudentDashboardPage from "./pages/StudentDashboard"
-import NotFound from "./pages/Notfound"
+// import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/Notfound";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Header from './components/Header';
+
 
 function Logout() {
   localStorage.clear()
@@ -29,7 +29,7 @@ function App() {
           path="/student/dashboard"
           element={
             <ProtectedRoute>
-              <StudentDashboardPage />  
+              <Dashboard />  
             </ProtectedRoute>
           }
         />
@@ -38,7 +38,6 @@ function App() {
        <Route path="/register" element={ <Registerandlogout/>} />
        <Route path="/logout" element={<Logout />} />
        <Route path="*" element = {<NotFound />}/>
-       
        
     </Routes>
 

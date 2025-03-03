@@ -177,3 +177,63 @@ class UserProfileView(APIView):
 # JWT Token Obtain Pair View
 class ObtainTokenPairView(TokenObtainPairView):
     pass
+
+
+# # views.py
+# from django.shortcuts import render, redirect
+# from django.contrib.auth.decorators import login_required
+# from .forms import StudentProfileForm, AlumniProfileForm, StaffProfileForm
+
+# @login_required
+# def update_profile(request):
+#     user = request.user
+#     profile = None
+#     profile_type = None
+
+#     # Determine which profile to load based on usertype
+#     if user.usertype == 'student':
+#         profile = user.student_profile
+#         profile_form = StudentProfileForm(instance=profile)
+#         profile_type = 'student'
+#     elif user.usertype == 'alumni':
+#         profile = user.alumni_profile
+#         profile_form = AlumniProfileForm(instance=profile)
+#         profile_type = 'alumni'
+#     elif user.usertype == 'staff':
+#         profile = user.staff_profile
+#         profile_form = StaffProfileForm(instance=profile)
+#         profile_type = 'staff'
+
+#     if request.method == 'POST':
+#         if profile_type == 'student':
+#             profile_form = StudentProfileForm(request.POST, instance=profile)
+#         elif profile_type == 'alumni':
+#             profile_form = AlumniProfileForm(request.POST, instance=profile)
+#         elif profile_type == 'staff':
+#             profile_form = StaffProfileForm(request.POST, instance=profile)
+
+#         if profile_form.is_valid():
+#             profile_form.save()
+#             return redirect('profile')  # Redirect to profile page after saving
+
+#     return render(request, 'update_profile.html', {
+#         'profile_form': profile_form,
+#         'profile_type': profile_type
+#     })
+    
+# @login_required
+# def view_profile(request):
+#     user = request.user
+#     profile = None
+
+#     if user.usertype == 'student':
+#         profile = user.student_profile
+#     elif user.usertype == 'alumni':
+#         profile = user.alumni_profile
+#     elif user.usertype == 'staff':
+#         profile = user.staff_profile
+
+#     return render(request, 'view_profile.html', {
+#         'user': user,
+#         'profile': profile,
+#     })

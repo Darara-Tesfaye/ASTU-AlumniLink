@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
+    'contactapp',
     'rest_framework',
     "corsheaders",
 ]
@@ -87,18 +88,24 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # Use MySQL as the database backend
-        'NAME': 'user_database',           # Replace with your database name
+        'ENGINE': 'django.db.backends.mysql',  
+        'NAME': 'user_database',           
         'USER': 'root',             
         'PASSWORD': 'RootP@ssword',    
         'HOST': '127.0.0.1',                    
         'PORT': '3306',                         
+    },
+    'secondary': {
+        'ENGINE': 'django.db.backends.mysql',  
+        'NAME': 'astu_alumnilink_contactapp_db',           
+        'USER': 'root',             
+        'PASSWORD': 'RootP@ssword',    
+        'HOST': '127.0.0.1',                    
+        'PORT': '3306',         
     }
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
 }
+
+DATABASE_ROUTERS = ['contactapp.db_router.MyDatabaseRouter']
 
 
 # Password validation
