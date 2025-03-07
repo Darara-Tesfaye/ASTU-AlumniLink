@@ -1,12 +1,18 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .models import StudentProfile, AlumniProfile, StaffProfile, CompanyProfile
-from .serializers import StudentProfileSerializer, AlumniProfileSerializer, StaffProfileSerializer, CompanyProfileSerializer
+from .models import StudentProfile, AlumniProfile, StaffProfile, CompanyProfile, CustomUser 
+from .serializers import StudentProfileSerializer, AlumniProfileSerializer, StaffProfileSerializer, CompanyProfileSerializer , UserSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 import pandas as pd
-import logging
 from rest_framework.views import APIView
+from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+import logging
+
 
 Student_mocked_Data = "users/Mocked_Data/Student_mocked_Data.xlsx"
 df = pd.read_excel(Student_mocked_Data, header=2)
@@ -161,19 +167,87 @@ class CompanyCreateView(generics.CreateAPIView):
     serializer_class = CompanyProfileSerializer
     permission_classes = [AllowAny]
     
+# User = get_user_model()
 
-class UserProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+# class LoginView(APIView):
+#     permission_classes = [AllowAny]
+#     logging.info(f"Received data:")
 
-    def get(self, request):
-        user = request.user
-        usertype = user.usertype  
-        return Response({
-            'email': user.email,
-            'usertype': usertype,
-        })
+#     def post(self, request):
+#         email = request.data.get('email')
+#         password = request.data.get('password')
+#         logging.info(f"Received data: email={email}, password={password}")
+
+#         user = authenticate(request, username=email, password=password)
+
+#         if user is not None:
+#             refresh = RefreshToken.for_user(user)
+#             user_data = UserSerializer(user).data
+
+#             return Response({
+#                 'refresh': str(refresh),
+#                 'access': str(refresh.access_token),
+#                 'user': user_data,
+#             }, status=status.HTTP_200_OK)
+#         else:
+#             logging.error("Invalid credentials provided")
+#             return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+User = get_user_model()
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        logging.info(f"Login attempt for email: {email}")
         
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            user_data = UserSerializer(user).data
+
+            logging.info("User authenticated successfully")
+            
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': user_data,
+            }, status=status.HTTP_200_OK)
+        else:
+            logging.error(f"Invalid credentials provided for email: {email}")
+            logging.error(f"Request data: {request.data}")
+            return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
+class UserSearchView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]  
+   
+
+    def get_queryset(self):
+        queryset = CustomUser.objects.all()  
+        search_term = self.request.query_params.get('search', None)
+        search_type = self.request.query_params.get('type', None)          
+        if search_type == 'student':
+            queryset = queryset.filter(usertype='student') 
+        elif search_type== 'Alumni':
+            queryset=queryset.filter(usertype='Alumni')
+        elif search_type=='staff':
+            queryset = queryset.filter(usertype='staff')
+        elif search_type=='company':
+            queryset =queryset.filter(usertype= 'company')
+        elif search_type == 'all_users':
+            pass
+
+        if search_term:
+            queryset = queryset.filter(
+                Q(full_name__icontains=search_term)
+            )
+
+        return queryset
+          
 # JWT Token Obtain Pair View
 class ObtainTokenPairView(TokenObtainPairView):
     pass

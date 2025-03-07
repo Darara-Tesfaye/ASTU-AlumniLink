@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ACCESS_TOKEN , REFRESH_TOKEN} from './constants.js'
+import { ACCESS_TOKEN } from './constants.js'
 
 const users_API = axios.create({
     baseURL : import.meta.env.VITE_users_API_URL

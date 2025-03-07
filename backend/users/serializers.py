@@ -15,7 +15,15 @@ class UserSerializer(serializers.ModelSerializer):
             # 'confirm_password',
         ]
 
+    # def validate(self, attrs):
+    #     return attrs
     def validate(self, attrs):
+        if not attrs.get('email'):
+            raise serializers.ValidationError("Email is required.")
+        if not attrs.get('full_name'):
+            raise serializers.ValidationError("Full name is required.")
+        if not attrs.get('usertype'):
+            raise serializers.ValidationError("User type is required.")
         return attrs
 
     def create(self, validated_data):
@@ -155,3 +163,19 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create_user(**user_data)  
         company_profile = CompanyProfile.objects.create(user=user, **validated_data)
         return company_profile
+    
+class CustomUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'full_name', 'password', 'usertype']
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+            full_name=validated_data['full_name'],
+            password=validated_data['password'],
+            usertype=validated_data['usertype'],
+        )
+        return user

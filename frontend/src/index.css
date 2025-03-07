@@ -23,7 +23,7 @@ body.dark .event-box{
 body.dark .contact-form{
   background-color:#1F2937;
 }
-body.dark .contact-form select option{
+body.dark .contact-form select option, .user_search option{
   background-color:#1F2937;
   color: white;
 }
@@ -39,7 +39,7 @@ body.dark .regform_body .regForm_content{
   background-color: #212429;
 
 }
-body.dark .regform_body .regForm_content label , body.dark .regform_body .regForm_content select option, body.dark .login_form label {
+body.dark .regform_body .regForm_content label , body.dark .regform_body .regForm_content select option, body.dark .login_form label, body.dark .main_Dashboard, body.dark .user_search{
   color: white;
   background-color: #212429;
 }
@@ -49,6 +49,10 @@ body.dark .regform_body .regForm_content .toggle-btn{
 body{
   background-color: #f7fafc;
 }
-body.dark .login_form{
+body.dark .login_form, body.dark .sidebar{
   background-color: #212429;
+  
+}
+body.dark .sidebar{
+  color: white;
 }

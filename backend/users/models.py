@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, AbstractUser
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -38,6 +38,23 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+# class SearchCustomUser(AbstractUser):
+#     USER_TYPE_CHOICES = [
+#         ('student', 'Student'),
+#         ('teacher', 'Teacher'),
+#         ('admin', 'Admin'),
+#     ]
+#     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES)
+#     email = models.EmailField(unique=True)
+
+#     @property
+#     def full_name(self):
+#         return f"{self.first_name} {self.last_name}"
+
+#     def __str__(self):
+#         return self.username
+
 class StudentProfile(models.Model):
     DEPARTMENT_CHOICES = [
         ('Applied Biology Program', 'Applied Biology Program'),

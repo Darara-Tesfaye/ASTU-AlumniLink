@@ -27,19 +27,24 @@
 //         setErrorMessage("");
 
 //         try {
-//             const res = await users_API.post('users/token/', { email, password });
+//             const res = await users_API.post('/users/token/', { email, password });
+//             console.log("Full response:", response);
 //             localStorage.setItem(ACCESS_TOKEN, res.data.access);
 //             localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-//             const usertype = await getUserType();
-//             if (usertype === 'student') {
-//                 navigate('/student/dashboard');
-//             } else if (usertype === 'Alumni') {
-//                 navigate('/dashboard/alumni');
-//             } else if (usertype === 'staff') {
-//                 navigate('/dashboard/staff');
-//             } else if (usertype === 'company') {
-//                 navigate('/dashboard/company');
-//             }
+//             const {  user } = res.data;
+//             localStorage.setItem('user', JSON.stringify(user));
+//             console.log("User data:", user);
+//             // const usertype = await getUserType();
+//             // if (usertype === 'student') {
+//             //     // navigate('/student/dashboard');
+//             //     navigate('/student/dashboard', { state: { usertype } });
+//             // } else if (usertype === 'Alumni') {
+//             //     navigate('/dashboard/alumni');
+//             // } else if (usertype === 'staff') {
+//             //     navigate('/dashboard/staff');
+//             // } else if (usertype === 'company') {
+//             //     navigate('/dashboard/company');
+//             // }
 //         } catch (error) {
 //             setErrorMessage(error.response?.data?.detail || 'Login failed. Please check your credentials.');
 //         } finally {
@@ -50,7 +55,7 @@
 //     const getUserType = async () => {
 //         try {
 //             const token = localStorage.getItem(ACCESS_TOKEN);
-//             const res = await users_API.get('users/profile/', {
+//             const res = await users_API.get('/users/login/', {
 //                 headers: {
 //                     Authorization: `Bearer ${token}`,
 //                 },
@@ -94,8 +99,8 @@
 //                 ></div>
 //                 <div className="grid grid-cols-1 gap-8 w-full md:px-20 px-4 md:my-14 my-8">
 //                     <div className="w-full relative">
-//                         <label for="email" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
-//                             Email<span class="text-red-500"> *</span>
+//                         <label htmlFor="email" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
+//                             Email<span className="text-red-500"> *</span>
 //                         </label>
 //                         <div className="flex items-center border border-gray-200  rounded-lg rounded pl-4 hover:border-blue-500 focus:border-blue-500">
 
@@ -112,8 +117,8 @@
 //                         </div>
 //                     </div>
 //                     <div className="w-full relative">
-//                         <label for="full_name" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
-//                             Password<span class="text-red-500"> *</span>
+//                         <label htmlFor="full_name" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
+//                             Password<span className="text-red-500"> *</span>
 //                         </label>
 
 //                         <div className="flex items-center border border-gray-200  rounded-lg rounded pl-4 hover:border-blue-500 focus:border-blue-500">
@@ -144,7 +149,6 @@
 
 
 // export default LoginForm;
-
 import { useState } from "react";
 import users_API from "../users_API";
 import { useNavigate } from "react-router-dom";
@@ -162,63 +166,69 @@ function LoginForm() {
     const [isDarkMode, setIsDarkMode] = useState(false);
 
     const navigate = useNavigate();
-
     const toggleTheme = () => {
         setIsDarkMode(!isDarkMode);
         document.body.classList.toggle('dark', !isDarkMode);
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setErrorMessage("");
-
+    
+        console.log("Data sent to backend:", { email, password }); // Log the data being sent
+    
         try {
-            const res = await users_API.post('users/token/', { email, password });
-            localStorage.setItem(ACCESS_TOKEN, res.data.access);
-            localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-            const usertype = await getUserType();
-            switch (usertype) {
-                case 'student':
-                    navigate('/student/dashboard');
-                    break;
-                case 'alumni':
-                    navigate('/dashboard/alumni');
-                    break;
-                case 'staff':
-                    navigate('/dashboard/staff');
-                    break;
-                case 'company':
-                    navigate('/dashboard/company');
-                    break;
-                default:
-                    throw new Error("User type not recognized");
-            }
+            const response = await users_API.post('/users/login/', { email, password });
+            localStorage.setItem(ACCESS_TOKEN, response.data.access);
+            localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
+    
+            const { user } = response.data; // Make sure this matches your backend response structure
+    
+            localStorage.setItem('user', JSON.stringify(user));
+    
+            const usertype = user.usertype;
+    
+            navigate('/dashboard', { state: { user } });
+    
         } catch (error) {
             setErrorMessage(error.response?.data?.detail || 'Login failed. Please check your credentials.');
+            console.error("Error response:", error.response); // Log the error response for debugging
         } finally {
             setLoading(false);
         }
     };
+    
 
-    const getUserType = async () => {
-        try {
-            const token = localStorage.getItem(ACCESS_TOKEN);
-            const res = await users_API.get('users/profile/', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            return res.data.usertype;
-        } catch (error) {
-            console.error('Failed to fetch user type:', error);
-            setErrorMessage('Error retrieving user type');
-            throw error;
-        }
-    };
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     setLoading(true);
+    //     setErrorMessage("");
+        
+    //     try {
+            
+    //         const response = await users_API.post('/users/login/', { email, password });
+    //         localStorage.setItem(ACCESS_TOKEN, response.data.access);
+    //         localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
+
+    //         const { user } = response.data; 
+
+    //         localStorage.setItem('user', JSON.stringify(user));
+
+    //         const usertype = user.usertype
+
+    //         // if (usertype === 'student') {
+    //         navigate('/dashboard', { state: { user } });
+          
+    //     } catch (error) {
+    //         setErrorMessage(error.response?.data?.detail || 'Login failed. Please check your credentials.');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
 
     return (
-        <div className="min-h-screen flex flex-col md:justify-center items-center md:p-10 px-6 my-20">
+        <div className="min-h-screen flex flex-col md:justify-center aligns-center md:p-10 px-6 my-20">
             <button
                 onClick={toggleTheme}
                 className="py-2 px-3 h-10 md:w-1/3 lg:w-1/4 w-1/2 border rounded-md bg-transparent dark:bg-gray-800 text-neutral-1000 dark:text-blue transition duration-300 float-right"
@@ -226,11 +236,22 @@ function LoginForm() {
                 <FontAwesomeIcon icon={isDarkMode ? faSun : faMoon} className="mr-2" />
                 {isDarkMode ? 'Light Mode' : 'Dark Mode'}
             </button>
-            <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center mx-auto py-5 rounded-lg shadow-md md:w-[700px] bg-white w-full">
+            <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center mx-auto h-100 py-5 rounded-lg shadow-md md:w-[700px] md:my-40 md:mt-10 bg-white w-full login_form">
                 <h1 className="text-3xl sm:text-6xl lg:text-5xl text-center tracking-wide bg-gradient-to-r from-orange-500 to-red-800 text-transparent bg-clip-text md:mt-16 mt-1">
                     Log In
                 </h1>
-                <div className="underline" style={{ left: '0', width: '30%', color: 'orange', marginTop: '1rem', borderBottom: '2px solid orange', transform: 'translateX(10%)' }}></div>
+                <div
+                    className="underline"
+                    style={{
+                        left: '0',
+                        alignItems: 'center',
+                        width: '30%',
+                        color: 'orange',
+                        marginTop: '1rem',
+                        borderBottom: '2px solid orange',
+                        transform: 'translateX(10%)',
+                    }}
+                ></div>
                 <div className="grid grid-cols-1 gap-8 w-full md:px-20 px-4 md:my-14 my-8">
                     <div className="w-full relative">
                         <label htmlFor="email" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
@@ -239,7 +260,7 @@ function LoginForm() {
                         <div className="flex items-center border border-gray-200 rounded-lg pl-4 hover:border-blue-500 focus:border-blue-500">
                             <FontAwesomeIcon icon={faEnvelope} className="text-gray-500 mr-2" />
                             <input
-                                className="w-full bg-transparent p-3 pr-5 border-none outline-none rounded-lg text-sm font-medium leading-6 shadow-none"
+                                className="w-full bg-transparent p-3 pr-5.75 border-none outline-none rounded-lg text-sm font-medium leading-6 shadow-none"
                                 type="email"
                                 name="email"
                                 id="email"
@@ -256,7 +277,7 @@ function LoginForm() {
                         <div className="flex items-center border border-gray-200 rounded-lg pl-4 hover:border-blue-500 focus:border-blue-500">
                             <FontAwesomeIcon icon={faLock} className="text-gray-500 mr-2" />
                             <input
-                                className="w-full bg-transparent p-3 pr-5 border-none outline-none rounded-lg text-sm font-medium leading-6 shadow-none"
+                                className="w-full bg-transparent p-3 pr-5.75 border-none outline-none rounded-lg text-sm font-medium leading-6 shadow-none"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
