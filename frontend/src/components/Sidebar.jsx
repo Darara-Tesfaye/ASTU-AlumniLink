@@ -1,44 +1,65 @@
-// src/components/Sidebar.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTachometerAlt, faBook, faBriefcase, faUsers, faSignOutAlt, faCog, faBell, faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
+import { faTachometerAlt, faBook, faBriefcase, faUsers, faSignOutAlt, faCog, faBell, faSun, faMoon, faHandsHelping, faLongArrowAltRight, faBullhorn, faStream } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
+import UserSearch from './User_Search';
+import { useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
+    const location = useLocation();
+    const { user } = location.state || {};
+    const usertype = user.usertype;
+
     const [isDarkMode, setIsDarkMode] = useState(false);
     const toggleTheme = () => {
         setIsDarkMode(!isDarkMode);
         document.body.classList.toggle('dark', !isDarkMode);
     };
     return (
-
         <aside className="bg-white text-gray-700 w-64 min-h-screen p-4 flex flex-col border-r-2 border-customGray sidebar">
-
             <nav>
                 <ul className="space-y-2">
+
                     <li>
                         <Link to="/dashboard" className="flex items-center p-2 hover:bg-gray-600 rounded">
                             <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />
                             Dashboard
                         </Link>
                     </li>
+                    {usertype === 'student' && (
+                        <>
+                            <li>
+                                <Link to="/find-mentor" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                    <FontAwesomeIcon icon={faHandsHelping} className="mr-2" />
+                                    Find a Mentor
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                    <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
+                                    Browser Internship
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                    <FontAwesomeIcon icon={faBook} className="mr-2" />
+                                    Access Resources
+                                </Link>
+                            </li>
+                        </>
+                    )}
+
                     <li>
-                        <Link to="/courses" className="flex items-center p-2 hover:bg-gray-600 rounded">
-                            <FontAwesomeIcon icon={faBook} className="mr-2" />
-                            Courses
+                        <Link to="/#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                            <FontAwesomeIcon icon={faBullhorn} className="mr-2" />
+                            UpComing Event
                         </Link>
                     </li>
                     <li>
-                        <Link to="/projects" className="flex items-center p-2 hover:bg-gray-600 rounded">
-                            <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
-                            Projects
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/users" className="flex items-center p-2 hover:bg-gray-600 rounded">
-                            <FontAwesomeIcon icon={faUsers} className="mr-2" />
-                            Users
+                        <Link to="/#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                            <FontAwesomeIcon icon={faStream} className="mr-2" />
+                            Join Discussion
                         </Link>
                     </li>
 

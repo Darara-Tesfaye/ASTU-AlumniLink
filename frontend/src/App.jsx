@@ -6,9 +6,10 @@ import LandingPage from "./pages/LandingPage";
 // import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/Notfound";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useState } from "react";
+// import { useState } from "react";
 
 import Dashboard from './components/Dashboard/Dashboard'
+import UserSearch from "./components/User_Search";
 import DashboardLayout from './components/Dashboard/DashboardLayout';
 // import StudentDashboard from "./components/Dashboard/StudentDashboard";
 
@@ -43,7 +44,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registerandlogout />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} /> 
+        <Route path="/find-mentor" element={<UserSearch />} />
 
       </Routes>
 

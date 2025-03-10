@@ -5,7 +5,7 @@ const UserManagement = () => {
     const [users, setUsers] = useState([]);
 
     const handleSearch = (filteredUsers) => {
-        setUsers(filteredUsers); // Update state with the filtered users
+        setUsers(filteredUsers); 
     };
 
     return (

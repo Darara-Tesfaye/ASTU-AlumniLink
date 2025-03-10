@@ -4,13 +4,15 @@ import { useLocation } from 'react-router-dom'
 
 const StudentDashboard = () => {
     const location = useLocation();
-    const { usertype } = location.state || {}; // Access the passed usertype
+    const { user } = location.state || {};
     return (
-        <div>
-            <h2>Student Dashboard</h2>
-            <p>Welcome, student! Here you can find your courses, grades, and more.</p>
-            
-            {/* Add more student-specific features here */}
+        <div container mx-auto p-4>
+            <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-4 grid-cols-2">
+                <div className="bg-blue-500 p-4 text-white">UpComing Event 4</div>
+                <div className="bg-green-500 p-4 text-white">Available Alumni 5</div>
+                <div className="bg-red-500 p-4 text-white">Element 3</div>
+                <div className="bg-yellow-500 p-4 text-white">Element 4</div>
+            </div>
         </div>
     );
 };

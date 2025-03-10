@@ -64,7 +64,7 @@ const Header = ({ toggleSidebar }) => {
                 <button onClick={toggleSidebar} className="md:hidden">
                     <FontAwesomeIcon icon={faBars} className="text-xl" />
                 </button>
-                <h1 className="text-xl font-bold ml-2 hidden sm:block">ASTU AlumniLink | User Dashboard</h1>
+                <h1 className="text-xl font-bold ml-2 hidden sm:block">ASTU AlumniLink | <span>{user.usertype}</span> Dashboard</h1>
                 <h1 className="text-xl font-bold ml-2 block sm:hidden">Dashboard</h1>
 
             </div>
