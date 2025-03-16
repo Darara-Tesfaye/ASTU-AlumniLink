@@ -16,8 +16,8 @@ const UserSearch = ({ onSearch }) => {
         setError('');
 
         try {
-            console.log( searchTerm)
-            console.log(searchType)
+            // console.log( searchTerm)
+            // console.log(searchType)
             const response = await fetch(`${BASE_URL}/users/search/?search=${searchTerm}&type=${searchType}`, {
                 method: 'GET',
                 headers: {
@@ -46,7 +46,15 @@ const UserSearch = ({ onSearch }) => {
     };
 
     const handleSearch = () => {
+        setLoading(true);
+        setError('');
+        if (!searchTerm.trim()) {
+            setError('Please enter a name to search for.');
+            setLoading(false);
+            return;
+        }
         fetchUsers(searchTerm, searchType);
+     
     };
 
     return (

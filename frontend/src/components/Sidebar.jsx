@@ -1,16 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTachometerAlt, faBook, faBriefcase, faUsers, faSignOutAlt, faCog, faBell, faSun, faMoon, faHandsHelping, faLongArrowAltRight, faBullhorn, faStream } from '@fortawesome/free-solid-svg-icons';
+import { faTachometerAlt, faBook, faBriefcase, faUsers, faSignOutAlt, faCog, faBell, faSun, faMoon, faHandsHelping, faLongArrowAltRight, faBullhorn, faStream, faPersonRifle, faPersonDress, faPerson, faUserAlt } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import UserSearch from './User_Search';
 import { useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
     const location = useLocation();
-    const { user } = location.state || {};
+    const { user, profile } = location.state || {};
     const usertype = user.usertype;
-
     const [isDarkMode, setIsDarkMode] = useState(false);
     const toggleTheme = () => {
         setIsDarkMode(!isDarkMode);
@@ -27,10 +26,16 @@ const Sidebar = () => {
                             Dashboard
                         </Link>
                     </li>
+                    <li>
+                        <Link to="/profile" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
+                            <FontAwesomeIcon icon={faUserAlt} className="mr-2" />
+                            Your Profile
+                        </Link>
+                    </li>
                     {usertype === 'student' && (
                         <>
                             <li>
-                                <Link to="/find-mentor" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                <Link to="/find-mentor" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
                                     <FontAwesomeIcon icon={faHandsHelping} className="mr-2" />
                                     Find a Mentor
                                 </Link>
@@ -47,6 +52,23 @@ const Sidebar = () => {
                                     Access Resources
                                 </Link>
                             </li>
+                        </>
+                    )}
+                    {usertype === 'Alumni' && (
+                        <>
+
+                            {/* <li>
+                                <Link to="#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                    <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
+                                    Browser Internship
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                    <FontAwesomeIcon icon={faBook} className="mr-2" />
+                                    Access Resources
+                                </Link>
+                            </li> */}
                         </>
                     )}
 

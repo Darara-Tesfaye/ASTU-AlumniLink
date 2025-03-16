@@ -25,6 +25,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=255)  
     is_active = models.BooleanField(default=True)  
     usertype = models.CharField(max_length=50) 
+    areas_of_interest = models.JSONField(default=list, blank=True, null=True)    
     joined_date = models.DateTimeField(default=timezone.now) 
     last_login = models.DateTimeField(default=timezone.now)
 
@@ -132,7 +133,8 @@ class AlumniProfile(models.Model):
     company = models.CharField(max_length=255, blank=True, null=True)
     job_title = models.CharField(max_length=255, blank=True, null=True)
     professional_field = models.CharField(max_length=255, blank=True, null=True)
-    areas_of_interest = models.JSONField(default=list)  
+    # areas_of_interest = models.JSONField(blank=True, null=True)
+    
 
     class Meta:
         db_table = 'alumni_profile'
@@ -175,6 +177,7 @@ class StaffProfile(models.Model):
     qualifications = models.CharField(max_length=50, choices=QUALIFICATION_CHOICES)
     years_of_experience = models.IntegerField() 
     expertise = models.TextField()  
+    # areas_of_interest = models.JSONField(blank=True, null=True)
     class Meta:
         db_table = 'staff_profile'
 

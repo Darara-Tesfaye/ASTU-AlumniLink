@@ -39,11 +39,7 @@ const initialFields = {
         networking: false,
         events: false,
     },
-    collaborative_interests: {
-        mentoring: false,
-        networking: false,
-        events: false,
-    }
+
 };
 
 function RegisterForm() {
@@ -79,11 +75,7 @@ function RegisterForm() {
                 ...fields.areas_of_interest,
                 [name]: checked,
             },
-            collaborative_interests: {
-                ...fields.areas_of_interest,
-                [name]: checked,
-            }
-
+           
         });
     };
 
@@ -111,6 +103,7 @@ function RegisterForm() {
                 full_name: fields.full_name,
                 usertype: activeTab,
                 password: fields.password,
+                areas_of_interest : fields.areas_of_interest || null,
             },
             student_id: fields.student_id || "",
             phone_number: fields.phone_number || "",
@@ -128,7 +121,7 @@ function RegisterForm() {
             userData.company = fields.company || "";
             userData.job_title = fields.job_title || "";
             userData.professional_field = fields.professional_field || "";
-            userData.areas_of_interest = fields.areas_of_interest || null;
+            
         }
         else if (activeTab === 'staff') {
             userData.position = fields.position || null;
@@ -136,10 +129,9 @@ function RegisterForm() {
             userData.qualifications = fields.qualifications || null;
             userData.years_of_experience = parseInt(fields.years_of_experience) || null; // Convert to number
             userData.expertise = fields.expertise || null;
-            userData.collaborative_interests = fields.collaborative_interests || null;
+            // userData.collaborative_interests = fields.collaborative_interests || null;
         }
         else if (activeTab === 'company') {
-
             userData.company_name = fields.company_name;
             userData.company_address = fields.company_address;
             userData.company_city = fields.company_city;
@@ -148,7 +140,7 @@ function RegisterForm() {
             userData.contact_person_phone_number = fields.contact_person_number;
         }
         const endpoint = userEndpoints[activeTab];
-        // console.log("Data sent to backend:", userData);
+        console.log("Data sent to backend:", userData);
 
         try {
             const res = await users_API.post(endpoint, userData);

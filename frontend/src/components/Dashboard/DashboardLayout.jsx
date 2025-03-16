@@ -3,8 +3,15 @@ import Header from '../Header';
 import Sidebar from '../Sidebar';
 import UserManagement from '../UserManagement'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
+
+
+   
 
 const DashboardLayout = ({ children }) => {
+    const location = useLocation();
+    const { user, profile } = location.state || {};
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => {
@@ -26,8 +33,7 @@ const DashboardLayout = ({ children }) => {
                
 
 
-                <main className={`flex-1 p-4 overflow-auto bg-white main_Dashboard ${isSidebarOpen ? 'pl-64' : ''}`}>
-               
+                <main className={`flex-1 p-4 overflow-auto bg-white main_Dashboard ${isSidebarOpen ? 'pl-64' : ''}`}>               
                     {children}
                 </main>
             </div>

@@ -12,11 +12,10 @@ class UserSerializer(serializers.ModelSerializer):
             'full_name',
             'usertype',
             'password',
-            # 'confirm_password',
+            'areas_of_interest'
         ]
 
-    # def validate(self, attrs):
-    #     return attrs
+  
     def validate(self, attrs):
         if not attrs.get('email'):
             raise serializers.ValidationError("Email is required.")
@@ -27,8 +26,10 @@ class UserSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        areas_of_interest = validated_data.pop('areas_of_interest', {})
         user = CustomUser(**validated_data)
         user.set_password(validated_data['password']) 
+        user.areas_of_interest = areas_of_interest
         user.save()
         return user
 class StudentProfileSerializer(serializers.ModelSerializer):
@@ -84,7 +85,7 @@ class AlumniProfileSerializer(serializers.ModelSerializer):
         fields = [
             'user', 'student_id', 'qualification', 'field_of_study',
             'graduated_year', 'employment_status', 'company',
-            'job_title', 'professional_field', 'areas_of_interest'
+            'job_title', 'professional_field'
         ]
 
     def create(self, validated_data):
@@ -122,6 +123,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
             'qualifications', 
             'years_of_experience', 
             'expertise', 
+            # 'areas_of_interest'
         ]
 
     def validate(self, attrs):
@@ -179,3 +181,49 @@ class CustomUserSerializer(serializers.ModelSerializer):
             usertype=validated_data['usertype'],
         )
         return user
+
+class UserSearchSerializer(serializers.Serializer):
+    full_name = serializers.CharField(required=True)
+    department = serializers.CharField(required=True)
+    areas_of_interest = serializers.JSONField(required=True)
+class MentorSearchSerializer(serializers.ModelSerializer):
+    alumni_profile = AlumniProfileSerializer(read_only=True)
+    staff_profile = StaffProfileSerializer(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id',  'email', 'alumni_profile', 'staff_profile']
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    alumni_profile = AlumniProfileSerializer(read_only=True)
+    staff_profile = StaffProfileSerializer(read_only=True)
+    student_profile = StudentProfileSerializer(read_only=True)
+    company_profile = CompanyProfileSerializer(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'email', 'full_name', 'usertype', 
+                  'alumni_profile', 'staff_profile', 
+                  'student_profile', 'company_profile']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Optionally remove profiles based on user type
+        if instance.usertype == 'student':
+            representation.pop('alumni_profile', None)
+            representation.pop('staff_profile', None)
+            representation.pop('company_profile', None)
+        elif instance.usertype == 'alumni':
+            representation.pop('student_profile', None)
+            representation.pop('staff_profile', None)
+            representation.pop('company_profile', None)
+        elif instance.usertype == 'staff':
+            representation.pop('alumni_profile', None)
+            representation.pop('student_profile', None)
+            representation.pop('company_profile', None)
+        elif instance.usertype == 'company':
+            representation.pop('alumni_profile', None)
+            representation.pop('staff_profile', None)
+            representation.pop('student_profile', None)
+        
+        return representation

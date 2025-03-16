@@ -175,24 +175,22 @@ function LoginForm() {
         setLoading(true);
         setErrorMessage("");
     
-        console.log("Data sent to backend:", { email, password }); // Log the data being sent
-    
         try {
             const response = await users_API.post('/users/login/', { email, password });
             localStorage.setItem(ACCESS_TOKEN, response.data.access);
             localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
     
-            const { user } = response.data; // Make sure this matches your backend response structure
+            const { user, profile } = response.data; 
     
             localStorage.setItem('user', JSON.stringify(user));
     
             const usertype = user.usertype;
-    
-            navigate('/dashboard', { state: { user } });
+            
+            navigate('/dashboard', { state: { user, profile } });
     
         } catch (error) {
             setErrorMessage(error.response?.data?.detail || 'Login failed. Please check your credentials.');
-            console.error("Error response:", error.response); // Log the error response for debugging
+            console.error("Error response:", error.response); 
         } finally {
             setLoading(false);
         }

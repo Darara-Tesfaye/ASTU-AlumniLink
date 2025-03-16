@@ -11,8 +11,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from './components/Dashboard/Dashboard'
 import UserSearch from "./components/User_Search";
 import DashboardLayout from './components/Dashboard/DashboardLayout';
-// import StudentDashboard from "./components/Dashboard/StudentDashboard";
-
+import Profile from "./components/User_Profile"
+import MentorSearchPage from  './pages/MentorSearchPage'
 
 function Logout() {
   localStorage.clear()
@@ -45,7 +45,8 @@ function App() {
         <Route path="/register" element={<Registerandlogout />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} /> 
-        <Route path="/find-mentor" element={<UserSearch />} />
+        <Route path="/profile" element={<Profile />} /> 
+        <Route path="/find-mentor" element={<MentorSearchPage />} />
 
       </Routes>
 

@@ -9,8 +9,8 @@ import { useLocation } from 'react-router-dom';
 const Dashboard = () => {
 
     const location = useLocation();
-    const { user } = location.state || {};
-    const usertype = user.usertype;
+    const { user, profile } = location.state || {};
+    const usertype = user.usertype;    
     
     const [searchResults, setSearchResults] = useState([]);
     
@@ -51,10 +51,11 @@ const Dashboard = () => {
                     </table>
                 </div>
             )}
+           
 
             {usertype === 'student' && <StudentDashboard />}
             {usertype === 'Alumni' && <AlumniDashboard />}
-            {usertype === 'faculty' && <FacultyDashboard />}
+            {usertype === 'staff' && <FacultyDashboard />}
             {usertype === 'company' && <CompanyDashboard />}
 
             {/* Handle unrecognized user types */}

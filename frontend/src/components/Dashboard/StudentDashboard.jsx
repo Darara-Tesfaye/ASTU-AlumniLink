@@ -1,10 +1,7 @@
 
 import React from 'react';
-import { useLocation } from 'react-router-dom'
-
 const StudentDashboard = () => {
-    const location = useLocation();
-    const { user } = location.state || {};
+  
     return (
         <div container mx-auto p-4>
             <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-4 grid-cols-2">
