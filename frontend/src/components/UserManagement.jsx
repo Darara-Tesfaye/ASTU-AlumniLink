@@ -9,7 +9,7 @@ const UserManagement = () => {
     };
 
     return (
-        <div>
+          <div>
             <UserSearch onSearch={handleSearch} />
             <div>
                 {users.map(user => (
@@ -20,6 +20,6 @@ const UserManagement = () => {
             </div>
         </div>
     );
-};
+};   
 
 export default UserManagement;
