@@ -8,9 +8,9 @@
   transition: all 0.3slinear;
 }
 nav.toggle-btn {
-  background-color: #1f1f1f; /* Dark navbar background */
+  background-color: #1f1f1f;
 }
-body.dark {
+body.dark, body.dark .dark_body {
   background-color: #121212; 
   color: #ffffff; 
 }
@@ -23,23 +23,22 @@ body.dark .event-box{
 body.dark .contact-form{
   background-color:#1F2937;
 }
-body.dark .contact-form select option, .user_search option{
+body.dark .contact-form select option, .user_search option,  body.dark .mentor_search_tr:hover{
   background-color:#1F2937;
   color: white;
 }
-body.dark .regform_body{
+body.dark .regform_body , body.dark .mentor_search{
  background-color:  #34393f;
  color: #fff;
 }
 body.dark .regform_body .regForm_left{
   background-color: #171b1e;
-
 }
-body.dark .regform_body .regForm_content{
+body.dark .regform_body .regForm_content {
   background-color: #212429;
 
 }
-body.dark .regform_body .regForm_content label , body.dark .regform_body .regForm_content select option, body.dark .login_form label, body.dark .main_Dashboard, body.dark .user_search{
+body.dark .regform_body .regForm_content label , body.dark .flex-box-profile, body.dark .regform_body .regForm_content select option, body.dark .login_form label, body.dark .main_Dashboard, body.dark .user_search, body.dark .event-label{
   color: white;
   background-color: #212429;
 }
@@ -49,10 +48,63 @@ body.dark .regform_body .regForm_content .toggle-btn{
 body{
   background-color: #f7fafc;
 }
-body.dark .login_form, body.dark .sidebar{
+body.dark .login_form, body.dark .sidebar , body.dark .alumni-profile{
   background-color: #212429;
   
 }
 body.dark .sidebar{
+  color: white;
+}
+
+body.dark .admin-sidebar{
+  background-color: #202123;
+}
+
+body.dark .admin-board, body.dark .more-status-bg, body.dark .create-form{
+  background-color: #17181a;
+ 
+}
+
+
+body.dark .admin-dashboard-h1,body.dark .admin-dashboard-content, body.dark .user-status-content , body.dark .event_table_conatiner{
+  background-color: #202123;
+  color: #b1b1b1;
+}
+body.dark .bg_dark_input{
+  background-color: transparent;
+}
+
+body.dark .dark_text{
+  color: aliceblue;
+}
+body.dark .event-box  {
+  background-color: #212429;
+}
+body.dark .event-box:hover{
+  background-color: #34393f;
+}
+body.dark  .event-box h1, body.dark .event-box p, body.dark .event-box h3{
+  color: white;
+}
+
+body.dark .event_table_conatiner .event_table{
+  background-color: #212429;
+  color: white;
+  
+}
+
+body.dark .event_table_conatiner.event_table th,
+body.dark .event_table_conatiner.event_table td {
+  padding: 0.75rem;
+  text-align: left;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+
+body.dark .event_table_conatiner .event_table tbody tr:nth-child(even) {
+  background-color: #212125;
+}
+body.dark .event_table_conatiner .event_table tbody tr:nth {
+  background-color: #34393f;
   color: white;
 }

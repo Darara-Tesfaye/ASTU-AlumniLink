@@ -1,16 +1,56 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTachometerAlt, faBook, faBriefcase, faUsers, faSignOutAlt, faCog, faBell, faSun, faMoon, faHandsHelping, faLongArrowAltRight, faBullhorn, faStream, faPersonRifle, faPersonDress, faPerson, faUserAlt } from '@fortawesome/free-solid-svg-icons';
+import { faTachometerAlt, faBook, faBriefcase, faUsers, faSignOutAlt, faCog, faBell, faSun, faMoon, faHandsHelping, faLongArrowAltRight, faBullhorn, faStream, faPersonRifle, faPersonDress, faPerson, faUserAlt, faPaw } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import UserSearch from './User_Search';
 import { useLocation } from 'react-router-dom';
+import { ACCESS_TOKEN } from '../constants';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
     const location = useLocation();
     const { user, profile } = location.state || {};
     const usertype = user.usertype;
+    const accessToken = localStorage.getItem(ACCESS_TOKEN);
+    const navigate = useNavigate();
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const BASE_URL = import.meta.env.VITE_users_API_URL;
+
+    useEffect(() => {
+        const fetchUnreadNotifications = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/users/notifications/`, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        toast.error('Unauthorized. Please log in.', { position: 'top-right' });
+                        navigate('/logout');
+                        return;
+                    }
+                    throw new Error('Failed to fetch notifications');
+                }
+                const data = await response.json();
+                const unread = data.filter(notif => !notif.is_read).length;
+                
+                setUnreadCount(unread);
+            } catch (error) {
+                console.log('Failed to fetch notifications', error ,  { position: 'top-right' });
+            }
+        };
+
+        if (accessToken && user) {
+            fetchUnreadNotifications();
+        }
+    }, [accessToken, user, navigate]);
+
+
     const toggleTheme = () => {
         setIsDarkMode(!isDarkMode);
         document.body.classList.toggle('dark', !isDarkMode);
@@ -21,7 +61,7 @@ const Sidebar = () => {
                 <ul className="space-y-2">
 
                     <li>
-                        <Link to="/dashboard" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                        <Link to="/dashboard" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
                             <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />
                             Dashboard
                         </Link>
@@ -41,63 +81,87 @@ const Sidebar = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link to="#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                <Link to="/internship-opportunity" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
                                     <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
-                                    Browser Internship
+                                    Browse Internship
                                 </Link>
                             </li>
                             <li>
-                                <Link to="#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                <Link to="/access-resource" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
                                     <FontAwesomeIcon icon={faBook} className="mr-2" />
                                     Access Resources
                                 </Link>
                             </li>
+
                         </>
                     )}
                     {usertype === 'Alumni' && (
                         <>
 
-                            {/* <li>
-                                <Link to="#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                            <li>
+                                <Link to="/job-opportunity" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
                                     <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
-                                    Browser Internship
+                                    Browse  Job
                                 </Link>
                             </li>
                             <li>
-                                <Link to="#" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                <Link to="/event_list" state={{user, profile}} className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                    <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
+                                    Events
+                                    </Link>
+                            </li>
+                        </>
+                    )}
+                    {usertype === 'staff' && (
+                        <>
+                            <li>
+                                <Link to="/resource-share" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
                                     <FontAwesomeIcon icon={faBook} className="mr-2" />
-                                    Access Resources
+                                    Share Resources
                                 </Link>
-                            </li> */}
+                            </li>
+
                         </>
                     )}
 
+                    {usertype === 'company' && (
+                        <>
+                            <li>
+                                <Link to="/create-event" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                    <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
+                                    Manage Events
+                                </Link>
+                            </li>
+
+                            <li>
+                                <Link to="/manage-opportunity" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
+                                    <FontAwesomeIcon icon={faBullhorn} className="mr-2" />
+                                    Manage Opportunity
+                                </Link>
+                            </li>
+
+
+                        </>
+                    )}
                     <li>
-                        <Link to="/#" className="flex items-center p-2 hover:bg-gray-600 rounded">
-                            <FontAwesomeIcon icon={faBullhorn} className="mr-2" />
-                            UpComing Event
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/#" className="flex items-center p-2 hover:bg-gray-600 rounded">
-                            <FontAwesomeIcon icon={faStream} className="mr-2" />
-                            Join Discussion
+                        <Link to="/friendlist" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
+                            <FontAwesomeIcon icon={faPaw} className="mr-2" />
+                            Contact your Friend
                         </Link>
                     </li>
 
                     <li>
-                        <Link to="/notifications" className="flex items-center p-2 hover:bg-gray-600 rounded">
+                        <Link to="/notifications" state={{ user, profile }} className="flex items-center p-2 hover:bg-gray-600 rounded">
                             <FontAwesomeIcon icon={faBell} className="mr-2" />
                             Notifications
+                            {unreadCount > 0 && (
+                                <span className="ml-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                    {unreadCount}
+                                </span>
+                            )}
                         </Link>
+                    </li>
 
-                    </li>
-                    <li>
-                        <Link to="/settings" className="flex items-center p-2 hover:bg-gray-600 rounded">
-                            <FontAwesomeIcon icon={faCog} className="mr-2" />
-                            Settings
-                        </Link>
-                    </li>
 
                 </ul>
             </nav>

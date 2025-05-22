@@ -29,8 +29,7 @@ const DashboardLayout = ({ children }) => {
                 </div>
                 <div className={`md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`}>
                     <Sidebar />
-                </div>
-               
+                </div>              
 
 
                 <main className={`flex-1 p-4 overflow-auto bg-white main_Dashboard ${isSidebarOpen ? 'pl-64' : ''}`}>               

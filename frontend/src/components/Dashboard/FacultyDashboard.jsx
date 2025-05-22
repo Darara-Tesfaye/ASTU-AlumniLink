@@ -1,7 +1,12 @@
-// src/components/Dashboard/FacultyDashboard.jsx
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 const FacultyDashboard = () => {
+    const location = useLocation();
+    const { user , profile } = location.state || {};
+    const usertype = user.usertype;
+    console.log("User", user);
+console.log("Profile", profile);
     return (
         <div>
             <h2>Faculty Dashboard</h2>

@@ -6,6 +6,9 @@ import LoadingIndicator from "./LoadingIndicator";
 import ASTUlogo from "../assets/images/ASTUlogo.jpg"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon, faLock, faUser, faEnvelope, faIdCard, faCalendarAlt, faPhone, faUserAlt, faUserTie, faBook, faBriefcase, faGraduationCap, faBuilding, faIndustry, faGlobe, faCity, faMapMarkerAlt, faMailBulk } from '@fortawesome/free-solid-svg-icons';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const userTypes = {
     student: ["full_name", "email", "password", "confirm_password", "student_id", "department", "admission_year", "graduation_year", "phone_number"],
@@ -51,6 +54,7 @@ function RegisterForm() {
     const navigate = useNavigate();
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [errors, setErrors] = useState({ phone_number: '' });
 
     const toggleNavbar = () => {
         setMobileDrawerOpen(!mobileDrawerOpen);
@@ -66,6 +70,11 @@ function RegisterForm() {
         setFields({ ...fields, [name]: value });
         setErrorMessage('');
         setSuccessMessage('');
+
+        if (name === 'phone_number') {
+            const error = validatePhoneNumber(value);
+            setErrors({ ...errors, phone_number: error });
+        }
     };
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
@@ -75,7 +84,7 @@ function RegisterForm() {
                 ...fields.areas_of_interest,
                 [name]: checked,
             },
-           
+
         });
     };
 
@@ -84,18 +93,77 @@ function RegisterForm() {
         setFields({ ...initialFields, user_type: userType });
     };
 
+    const validatePhoneNumber = (value) => {
+        if (!value) return '';
+
+        const digits = value.replace(/\D/g, '');
+        const startsWithPlus = value.startsWith('+');
+
+        const validChars = new Set(digits + (startsWithPlus ? '+' : ''));
+        if (new Set(value).size > validChars.size) {
+            return 'Phone number can only contain digits and an optional leading "+".';
+        }
+
+        if (!digits.startsWith('09') && !digits.startsWith('07') && !(startsWithPlus && value.startsWith('+251'))) {
+            return 'Use Ethiopia country code for phone number.';
+        }
+
+        const digitCount = digits.length;
+        if (value.startsWith('+251')) {
+            if (digitCount !== 12) {
+                return 'Phone number with "+251" must have exactly 13 digits.';
+            }
+        } else if (digits.startsWith('09') || digits.startsWith('07')) {
+            if (digitCount !== 10) {
+                return 'Phone number  must have exactly 10 digits.';
+            }
+        }
+
+        if (value.length > 15) {
+            return 'Phone number cannot exceed 15 characters.';
+        }
+
+        return '';
+    };
+
+    const validateGraduatedYear = () => {
+        const currentYear = new Date().getFullYear();
+        const admissionYear = parseInt(fields.student_id.split('/').pop(), 10);
+        const admission_year = admissionYear + 2000;
+        const minGraduatedYear = admission_year + 4;
+        const maxGraduatedYear = admission_year + 7;
+
+        if (fields.graduated_year > currentYear) {
+            toast.error("Graduated year cannot be in the future.");
+            return false;
+        }
+        if (fields.graduated_year < minGraduatedYear || fields.graduated_year > maxGraduatedYear) {
+            toast.error(`Graduated year must be between ${minGraduatedYear} and ${maxGraduatedYear}.`);
+            return false;
+        }
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setErrorMessage('');
-        setSuccessMessage('');
 
         if (fields.password !== fields.confirm_password) {
-            setErrorMessage("Passwords Mismatch.");
+            toast.error("Passwords Mismatch.");
             setLoading(false);
             return;
         }
-
+        const phoneError = validatePhoneNumber(fields.phone_number);
+        if (phoneError) {
+            setErrors({ ...errors, phone_number: phoneError });
+            toast.error(phoneError);
+            setLoading(false);
+            return;
+        }
+        if (!validateGraduatedYear()) {
+            setLoading(false);
+            return;
+        }
 
         const userData = {
             user: {
@@ -103,7 +171,7 @@ function RegisterForm() {
                 full_name: fields.full_name,
                 usertype: activeTab,
                 password: fields.password,
-                areas_of_interest : fields.areas_of_interest || null,
+                areas_of_interest: fields.areas_of_interest || null,
             },
             student_id: fields.student_id || "",
             phone_number: fields.phone_number || "",
@@ -120,19 +188,18 @@ function RegisterForm() {
             userData.employment_status = fields.employment_status || null;
             userData.company = fields.company || "";
             userData.job_title = fields.job_title || "";
-            userData.professional_field = fields.professional_field || "";
-            
+            userData.professional_field = fields.professional_field || "None";
+
         }
         else if (activeTab === 'staff') {
             userData.position = fields.position || null;
             userData.department = fields.department || null;
             userData.qualifications = fields.qualifications || null;
-            userData.years_of_experience = parseInt(fields.years_of_experience) || null; // Convert to number
+            userData.years_of_experience = parseInt(fields.years_of_experience) || null;
             userData.expertise = fields.expertise || null;
-            // userData.collaborative_interests = fields.collaborative_interests || null;
         }
         else if (activeTab === 'company') {
-            userData.company_name = fields.company_name;
+            userData.company_name = fields.company_contact_prerson_name;
             userData.company_address = fields.company_address;
             userData.company_city = fields.company_city;
             userData.company_country = fields.company_country;
@@ -144,7 +211,7 @@ function RegisterForm() {
 
         try {
             const res = await users_API.post(endpoint, userData);
-            setSuccessMessage('Registration successful!');
+            toast.success('Registration successful!');
             localStorage.setItem(ACCESS_TOKEN, res.data.access);
             localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
             navigate("/login");
@@ -154,22 +221,21 @@ function RegisterForm() {
 
                 if (typeof errors === 'object') {
                     if (errors.detail) {
-                        setErrorMessage(errors.detail);
+                        toast.error(errors.detail);
                     } else if (Array.isArray(errors.non_field_errors)) {
-                        setErrorMessage(errors.non_field_errors.join(", "));
+                        toast.error(errors.non_field_errors.join(", "));
                     } else if (errors.user && Array.isArray(errors.user.email)) {
-                        setErrorMessage(errors.user.email[0]);
+                        toast.error(errors.user.email[0]);
                     }
                     else {
-                        // If errors is an object with multiple keys, join the messages
                         const errorMessages = Object.values(errors).flat().join(", ");
-                        setErrorMessage(errorMessages);
+                        toast.error(errorMessages);
                     }
                 } else {
-                    setErrorMessage('An unexpected error occurred.');
+                    toast.error('An unexpected error occurred.');
                 }
             } else {
-                setErrorMessage('Network error. Please check your connection.');
+                toast.error('Network error. Please check your connection.');
             }
         } finally {
             setLoading(false);
@@ -178,6 +244,7 @@ function RegisterForm() {
 
     return (
         <div className="p-4 md:p-16 md:pl-4 md:pt-4 bg-gray-100 regform_body">
+            <ToastContainer />
             <div class="grid grid-cols-1 md:grid-cols-3 gap-1 items-start shadow-lg mx-auto p-2.5 bg-white pl-0 regForm_content">
                 <div className="min-h-50 md:min-h-screen bg-gray-100 flex flex-col justify-start md:justify-center items-center p-2 shadow-lg  w-full regForm_left">
                     <button
@@ -224,19 +291,9 @@ function RegisterForm() {
                             transform: 'translateX(50%)',
                         }}
                     ></div>
-                    {/*  <div className="tabs float-right flex gap-2">
-                            {Object.keys(userTypes).map(type => (
-                                <button
-                                    key={type}
-                                    className={activeTab === type ? "active" : ""}
-                                    onClick={() => handleTabChange(type)}
-                                >
-                                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                                </button>
-                            ))}
-                        </div> */}
+
                     <div className="flex flex-col gap-6">
-                        <div className="tabs flex justify-end gap-1 m-4 ml-90 ">
+                        <div className="tabs flex justify-end gap-1 m-4 ml-90 sm:flex-row flex-col">
                             {Object.keys(userTypes).map(type => (
                                 <button
                                     key={type}
@@ -332,6 +389,7 @@ function RegisterForm() {
                                             value={fields.department}
                                             onChange={handleChange}
                                         >
+                                            <option value="">Select a Department</option>
                                             <option value="Computer Science and Engineering">Computer Science and Engineering</option>
                                             <option value="Applied Biology Program">Applied Biology Program</option>
                                             <option value="Applied Chemistry">Applied Chemistry</option>
@@ -456,7 +514,7 @@ function RegisterForm() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="w-full relative">
                                         <label for="full_name" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
-                                            Full Name<span class="text-red-500"> *</span>
+                                            ID Number<span class="text-red-500"> *</span>
                                         </label>
 
                                         <div className="flex items-center border border-gray-200  rounded-lg rounded pl-4 hover:border-blue-500 focus:border-blue-500">
@@ -923,32 +981,31 @@ function RegisterForm() {
                         {activeTab === "company" && (
                             <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
                                     <div className="w-full relative">
-                                        <label for="company_contactP_name" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
-                                            Contact Person Full Name<span class="text-red-500"> *</span>
+                                        <label for="company_Name" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
+                                            Company Name<span class="text-red-500"> *</span>
                                         </label>
-
                                         <div className="flex items-center border border-gray-200  rounded-lg rounded pl-4 hover:border-blue-500 focus:border-blue-500">
-
-                                            <FontAwesomeIcon icon={faUser} className="text-gray-500 mr-2" />
+                                            <FontAwesomeIcon icon={faBuilding} className="text-gray-500 mr-2" />
                                             <input
-
                                                 className="w-full bg-transparent p-3 pr-5.75 border-none outline-none rounded-lg text-sm font-medium leading-6 shadow-none"
                                                 type="text"
                                                 name="full_name"
-                                                id="company_contactP_name"
+                                                id="full_name"
                                                 value={fields.full_name}
                                                 onChange={handleChange}
+                                                placeholder="Name of company"
                                                 required
                                             />
                                         </div>
                                     </div>
                                     <div className="w-full relative">
                                         <label for="contact_person_email" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
-                                            Contact Person Email<span class="text-red-500"> *</span>
+                                            Company Email<span class="text-red-500"> *</span>
                                         </label>
                                         <div className="flex items-center border border-gray-200  rounded-lg rounded pl-4 hover:border-blue-500 focus:border-blue-500">
-
                                             <FontAwesomeIcon icon={faEnvelope} className="text-gray-500 mr-2" />
                                             <input
 
@@ -965,19 +1022,21 @@ function RegisterForm() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="w-full relative">
-                                        <label for="company_Name" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
-                                            Company Name<span class="text-red-500"> *</span>
+                                        <label for="company_contactP_name" className="absolute inline-block px-2.5 m-0 top-0 left-3 bg-white transform -translate-y-1/2 text-xs font-normal leading-4 text-gray-500 z-10">
+                                            Contact Person Full Name<span class="text-red-500"> *</span>
                                         </label>
+
                                         <div className="flex items-center border border-gray-200  rounded-lg rounded pl-4 hover:border-blue-500 focus:border-blue-500">
-                                            <FontAwesomeIcon icon={faBuilding} className="text-gray-500 mr-2" />
+
+                                            <FontAwesomeIcon icon={faUser} className="text-gray-500 mr-2" />
                                             <input
+
                                                 className="w-full bg-transparent p-3 pr-5.75 border-none outline-none rounded-lg text-sm font-medium leading-6 shadow-none"
                                                 type="text"
-                                                name="company_name"
-                                                id="company_Name"
-                                                value={fields.company_name}
+                                                name="company_contact_prerson_name"
+                                                id="company_contactP_name"
+                                                value={fields.company_contact_prerson_name}
                                                 onChange={handleChange}
-                                                placeholder="Name of company"
                                                 required
                                             />
                                         </div>

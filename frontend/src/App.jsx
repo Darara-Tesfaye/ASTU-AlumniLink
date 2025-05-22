@@ -9,10 +9,45 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // import { useState } from "react";
 
 import Dashboard from './components/Dashboard/Dashboard'
-import UserSearch from "./components/User_Search";
+// import UserSearch from "./components/User_Search";
 import DashboardLayout from './components/Dashboard/DashboardLayout';
-import Profile from "./components/User_Profile"
-import MentorSearchPage from  './pages/MentorSearchPage'
+import UserProfile from "./components/User Profile/Userprofile";
+import ProfileLayout from "./components/User Profile/Profilelayout";
+
+
+//  MentorSearchLayout
+import MentorSearch from "./components/Mentor Search/MentorSearch";
+import MentorSearchLayout from "./components/Mentor Search/MentorSearchLayout";
+import AdminDashboard from "./components/Admin/AdminDashboard";
+// import ManageUsers from "./components/Admin/ManageUsers";
+import EventsLayout from "./components/Events/EventsLayout";
+import CreateEventForm from "./components/Events/Create_Events";
+
+import FriendList from "./components/Chat/FriendList";
+import ChatPage from "./components/Chat/chat";
+
+
+import ManageEvents from "./components/Admin/ManageEvents";
+import AdminManageOpportunities from "./components/Admin/ManageOpportunities";
+
+import ForgotPassword from "./components/forgotPassword";
+import ManageOpportunities from "./components/Opportunity/ManageOpportunity";
+import OpportunitiesLayout from "./components/Opportunity/OpportunityLayout";
+import BrowseInternship from "./components/Opportunity/BrowseInternship";
+import BrowseJob from "./components/Opportunity/BrowseJob";
+import ApplyInternship from "./components/Opportunity/ApplyInternship";
+import ApplyJob from "./components/Opportunity/ApplyJob";
+import ApplicantPage from "./components/Opportunity/AppllicantListPage";
+import JobApplicantPage from "./components/Opportunity/JobApplicantListPage";
+
+import ResourceShareUpload from "./components/Resource Sharing/Resourceshare";
+import AccessResources from "./components/Resource Sharing/AccessResource";
+
+import Notifications from "./components/Notifications";
+import EventDetail from "./components/Events/Eventdetail";
+import UserEventList from "./components/Events/ListEvents";
+
+import { User } from "lucide-react";
 
 function Logout() {
   localStorage.clear()
@@ -25,10 +60,10 @@ function Registerandlogout() {
 
 }
 function App() {
-  
+
   return (
     <BrowserRouter>
-   
+
       <Routes>
         <Route
           path="/dashboard"
@@ -40,13 +75,197 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admindashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manage-opportunity"
+          element={
+            <ProtectedRoute>
+              <OpportunitiesLayout>
+                <ManageOpportunities />
+              </OpportunitiesLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-opportunities"
+          element={
+            <ProtectedRoute>
+              <AdminManageOpportunities />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/friendlist"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <FriendList />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/resource-share"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ResourceShareUpload />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/access-resource"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <AccessResources />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Notifications />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+
+
+        <Route
+          path="/chat/:friendId"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ChatPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/apply-internship/:id"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ApplyInternship />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/apply-job/:id"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ApplyJob />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/internship-opportunity"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <BrowseInternship />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/job-opportunity"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <BrowseJob />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/applicant"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ApplicantPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/job-applicant"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <JobApplicantPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/event_list"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <UserEventList />
+              </DashboardLayout>
+            </ProtectedRoute>
+
+          }
+        />
+        <Route
+          path="/event_list/:id"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <EventDetail />
+              </DashboardLayout>
+            </ProtectedRoute>
+
+          }
+        />
+
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registerandlogout />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="*" element={<NotFound />} /> 
-        <Route path="/profile" element={<Profile />} /> 
-        <Route path="/find-mentor" element={<MentorSearchPage />} />
+        <Route path="*" element={<NotFound />} />
+        <Route path="/profile" element={
+          <ProfileLayout>
+            <UserProfile />
+          </ProfileLayout>
+        } />
+        <Route path="/create-event" element={
+          <ProtectedRoute>
+            <EventsLayout>
+              <CreateEventForm />
+            </EventsLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/find-mentor" element={
+          <MentorSearchLayout>
+            <MentorSearch />
+          </MentorSearchLayout>
+        } />
+        <Route path="/events" element={<ManageEvents />} />
+        <Route path="/forgotpassword" element={<ForgotPassword />} />
+
+
 
       </Routes>
 

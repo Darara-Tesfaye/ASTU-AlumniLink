@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from events.models import Event
 
 
 class CustomUserManager(BaseUserManager):
@@ -15,9 +16,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
         return self.create_user(email, password, **extra_fields)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -40,21 +39,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
     
-# class SearchCustomUser(AbstractUser):
-#     USER_TYPE_CHOICES = [
-#         ('student', 'Student'),
-#         ('teacher', 'Teacher'),
-#         ('admin', 'Admin'),
-#     ]
-#     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES)
-#     email = models.EmailField(unique=True)
-
-#     @property
-#     def full_name(self):
-#         return f"{self.first_name} {self.last_name}"
-
-#     def __str__(self):
-#         return self.username
 
 class StudentProfile(models.Model):
     DEPARTMENT_CHOICES = [
@@ -83,6 +67,13 @@ class StudentProfile(models.Model):
     admission_year = models.IntegerField(default=2013)
     graduation_year = models.IntegerField()
     phone_number = models.CharField(max_length=15, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)  
+    profile_pic = models.ImageField(upload_to='Profile_Picture/Srudent/', blank=True, null=True)  
+    skills = models.JSONField(blank=True, null=True) 
+    interests = models.JSONField(blank=True, null=True) 
+    achievements = models.JSONField(blank=True, null=True)  
+    activities = models.JSONField(blank=True, null=True)  
+    professional_experiences = models.JSONField(blank=True, null=True)  
 
     class Meta:
         db_table = 'student_profile'
@@ -123,7 +114,6 @@ class AlumniProfile(models.Model):
         ('Unemployed', 'Unemployed'),
         ('Employed', 'Employed'),
     ]
-
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='alumni_profile')
     student_id = models.CharField(max_length=50, blank=True, null=True) 
     qualification = models.CharField(max_length=50, choices=QUALIFICATION_CHOICES)
@@ -133,7 +123,10 @@ class AlumniProfile(models.Model):
     company = models.CharField(max_length=255, blank=True, null=True)
     job_title = models.CharField(max_length=255, blank=True, null=True)
     professional_field = models.CharField(max_length=255, blank=True, null=True)
-    # areas_of_interest = models.JSONField(blank=True, null=True)
+    work_history = models.JSONField(blank=True, null=True)  
+    bio = models.TextField(blank=True, null=True)  
+    profile_picture = models.ImageField(upload_to='Profile_Picture/Alumni/', blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     
 
     class Meta:
@@ -141,6 +134,7 @@ class AlumniProfile(models.Model):
 
     def __str__(self):
         return self.user.email
+
 class StaffProfile(models.Model):
     DEPARTMENT_CHOICES = [
         ('Applied Biology Program', 'Applied Biology Program'),
@@ -203,9 +197,58 @@ class CompanyProfile(models.Model):
     company_country = models.CharField(max_length=255)
     website_url = models.URLField(blank=True, null=True)
     contact_person_phone_number = models.CharField(max_length=20)
+    profile_picture = models.ImageField(upload_to='Profile_Picture/Company/', blank=True, null=True)
+
 
     class Meta:
         db_table = 'company_profile'
 
     def __str__(self):
         return self.name
+
+
+class Connection(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    )
+
+    requester = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='requested_connections', on_delete=models.CASCADE)
+    requestee = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_connections', on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('requester', 'requestee')
+        db_table = 'connections'
+
+    def __str__(self):
+        return f"{self.requester.email} -> {self.requestee.email} [{self.status}]"
+    
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('new_resource', 'New Resource Shared'),
+        ('connect_request', 'New Connection Request'),
+        ('connect_accept', 'Connection Accepted'),
+        ('event_announcement', 'New Event Announcement'),
+        ('new_message', 'New Message'),   
+        ('new_opportunity', 'New Opportunity'),     
+        ('internship_application_status', 'Internship Application Status'),
+        ('job_application_status', 'Job Application Status'),      
+    )
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        db_table = 'notification'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.notification_type}"

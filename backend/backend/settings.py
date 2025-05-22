@@ -8,6 +8,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  
+MEDIA_URL = '/media/'  
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -50,6 +52,7 @@ INSTALLED_APPS = [
     'contactapp',
     'rest_framework',
     "corsheaders",
+    'events',
 ]
 
 MIDDLEWARE = [
@@ -103,7 +106,15 @@ DATABASES = {
         'PASSWORD': 'RootP@ssword',    
         'HOST': '127.0.0.1',                    
         'PORT': '3306',         
-    }
+    },
+    'events_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'events_db',  
+        'USER': 'root',
+        'PASSWORD': 'RootP@ssword',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
 }
 
 DATABASE_ROUTERS = ['contactapp.db_router.MyDatabaseRouter']

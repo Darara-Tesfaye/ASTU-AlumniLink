@@ -188,6 +188,7 @@ const ContactForm = () => {
         message: '',
         affiliation: '',
       });
+      console.log(form);
     } catch (error) {
       setStatusMessage('Error submitting feedback. Please try again.');
       setIsError(true);
