@@ -84,11 +84,6 @@ const ManageOpportunities = () => {
                 },
             });
             if (!response.ok) {
-                if (response.status === 401) {
-                    toast.error('Unauthorized. Please log in.', { position: 'top-right' });
-                    navigate('/login');
-                    return;
-                }
                 throw new Error('Failed to fetch opportunities');
             }
             const data = await response.json();

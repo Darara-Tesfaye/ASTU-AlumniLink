@@ -18,7 +18,7 @@ const BrowseJob = () => {
     const BASE_URL = import.meta.env.VITE_users_API_URL || 'http://127.0.0.1:8000';
     const userFieldOfStudy = profile?.field_of_study || 'computerScience';
     const userId = user?.id;
-    const today = new Date('2025-05-15T22:23:00Z'); // May 15, 2025, 10:23 PM EAT
+    const today = new Date('2025-05-15T22:23:00Z'); 
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,7 +29,6 @@ const BrowseJob = () => {
             }
             setLoading(true);
             try {
-                // Fetch all jobs
                 const jobsResponse = await fetch(`${BASE_URL}/events/jobs/`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
@@ -42,7 +41,6 @@ const BrowseJob = () => {
                 console.log("Fetched jobs:", jobsData);
                 const jobArray = Array.isArray(jobsData) ? jobsData : [jobsData];
 
-                // Fetch applied jobs
                 const appliedResponse = await fetch(`${BASE_URL}/events/job-applied/`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,

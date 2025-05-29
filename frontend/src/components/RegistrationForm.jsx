@@ -54,7 +54,13 @@ function RegisterForm() {
     const navigate = useNavigate();
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const [errors, setErrors] = useState({ phone_number: '' });
+    const [errors, setErrors] = useState({
+    phone_number: "",
+    contact_person_number: "",
+    password: null,
+    confirm_password: null,
+  });
+
 
     const toggleNavbar = () => {
         setMobileDrawerOpen(!mobileDrawerOpen);
@@ -70,12 +76,33 @@ function RegisterForm() {
         setFields({ ...fields, [name]: value });
         setErrorMessage('');
         setSuccessMessage('');
+        const newErrors = { ...errors };
 
-        if (name === 'phone_number') {
+        if (name === 'phone_number' || name === 'contact_person_number') {
             const error = validatePhoneNumber(value);
-            setErrors({ ...errors, phone_number: error });
+            newErrors.phone_number = error;
         }
+        if (name === "password") {
+            const passwordRequirements = [
+                value.length < 8 && "Password must be at least 8 characters long",
+                !/[A-Za-z]/.test(value) && "Password must contain at least one letter",
+                !/[0-9]/.test(value) && "Password must contain at least one number",
+                !/[!@#$%^&*()_+[\]{};':"\\|,.<>?]/.test(value) &&
+                "Password must contain at least one special character",
+            ].filter(Boolean);
+            newErrors.password = passwordRequirements.length
+                ? passwordRequirements
+                : null;
+        }
+
+        if (name === "confirm_password") {
+            newErrors.confirm_password =
+                value !== fields.password ? "Passwords do not match" : null;
+        }
+
+        setErrors(newErrors);
     };
+
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
         setFields({
@@ -148,15 +175,14 @@ function RegisterForm() {
         e.preventDefault();
         setLoading(true);
 
-        if (fields.password !== fields.confirm_password) {
-            toast.error("Passwords Mismatch.");
+        if (errors.password || errors.confirm_password || errors.phone_number) {
+            toast.error("Please fix the errors in the form.");
             setLoading(false);
             return;
         }
-        const phoneError = validatePhoneNumber(fields.phone_number);
-        if (phoneError) {
-            setErrors({ ...errors, phone_number: phoneError });
-            toast.error(phoneError);
+
+        if (fields.password !== fields.confirm_password) {
+            toast.error("Passwords Mismatch.");
             setLoading(false);
             return;
         }
@@ -463,6 +489,11 @@ function RegisterForm() {
                                                 onChange={handleChange}
                                             />
                                         </div>
+                                        {errors.phone_number && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.phone_number}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </>
@@ -713,6 +744,11 @@ function RegisterForm() {
                                                 onChange={handleChange}
                                             />
                                         </div>
+                                        {errors.phone_number && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.phone_number}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="w-full relative col-span-1 ">
@@ -1149,6 +1185,11 @@ function RegisterForm() {
                                                 onChange={handleChange}
                                             />
                                         </div>
+                                        {errors.phone_number && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.phone_number}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -1164,7 +1205,6 @@ function RegisterForm() {
 
                                     <FontAwesomeIcon icon={faLock} className="text-gray-500 mr-2" />
                                     <input
-
                                         className="w-full bg-transparent p-3 pr-5.75 border-none outline-none rounded-lg text-sm font-medium leading-6 shadow-none" type="password"
                                         name="password"
                                         id="password"
@@ -1174,6 +1214,13 @@ function RegisterForm() {
                                         autoComplete="new-password"
                                     />
                                 </div>
+                                {errors.password && (
+                                    <ul className="text-red-500 text-xs mt-1 list-disc pl-5">
+                                        {errors.password.map((error, idx) => (
+                                            <li key={idx}>{error}</li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>
 
                             <div className="w-full relative">
@@ -1197,6 +1244,11 @@ function RegisterForm() {
                                         autoComplete="new-password"
                                     />
                                 </div>
+                                {errors.confirm_password && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.confirm_password}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1204,7 +1256,6 @@ function RegisterForm() {
 
                     {loading && <LoadingIndicator />}
                     {errorMessage && <div className="text-white bg-red-500 text-center m-4 mx-10 h-10 p-2">{errorMessage}</div>}
-                    {successMessage && <div className="text-green-500">{successMessage}</div>}
                     <button className="float-right w-6/12 p-2.5 my-5 bg-blue-500 text-white border-none rounded-md cursor-pointer transition duration-200 ease-in-out hover:bg-blue-600" type="submit">
                         Register
                     </button>

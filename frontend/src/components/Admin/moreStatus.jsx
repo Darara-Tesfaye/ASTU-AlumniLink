@@ -7,7 +7,7 @@ const MoreStatus = () => {
   const BASE_URL = import.meta.env.VITE_users_API_URL;
   const [userStats, setUserStats] = useState({
     students: 0,
-    faculty: 0,
+    staff: 0,
     alumni: 0,
     companies: 0,
     employedAlumni: 0,
@@ -35,7 +35,7 @@ const MoreStatus = () => {
 
   const barData = [
     { name: "Students", value: userStats.students },
-    { name: "Faculty", value: userStats.faculty },
+    { name: "Faculty", value: userStats.staff},
     { name: "Alumni", value: userStats.alumni },
     { name: "Companies", value: userStats.companies },
   ];
@@ -52,7 +52,6 @@ const MoreStatus = () => {
       <div className="max-w-6xl mx-auto px-6 py-12">
         <h1 className="text-3xl font-bold text-gray-600  text-center mb-6">User Status & Statistics</h1>
 
-        {/* User Statistics Grid */}
         <div className="grid md:grid-cols-4 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 user-status-content">
             <FontAwesomeIcon icon={faUserGraduate} className="text-gray-500 mr-2" />
@@ -66,7 +65,7 @@ const MoreStatus = () => {
             <FontAwesomeIcon icon={faChalkboardTeacher} className="text-green-600 text-4xl" />
             <div>
               <h2 className="text-xl font-semibold text-gray-500">Total Faculty</h2>
-              <p className="text-2xl font-bold">{userStats.faculty}</p>
+              <p className="text-2xl font-bold">{userStats.staff}</p>
             </div>
           </div>
 

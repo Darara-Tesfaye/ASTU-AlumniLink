@@ -42,8 +42,6 @@ const JobApplicantPage = () => {
                 const userData = await userResponse.json();
                 console.log("Fetched user:", userData);
                 setCurrentUser(userData);
-
-                // Fetch job applicants
                 const applicantsResponse = await fetch(`${BASE_URL}/events/job-applicant/`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,

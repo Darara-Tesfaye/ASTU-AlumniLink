@@ -12,6 +12,7 @@ urlpatterns = [
  path("users/", include("users.urls")),
  path("contactapp/", include("contactapp.urls")),
  path("events/", include("events.urls")),
+ path("discussion_forum/", include("discussion_forum.urls")),
 ]
 if settings.DEBUG: 
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

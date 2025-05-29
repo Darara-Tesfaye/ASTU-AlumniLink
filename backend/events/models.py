@@ -37,7 +37,11 @@ class Event(models.Model):
     
     title = models.CharField(max_length=200)
     description = models.TextField()
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='events_created')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='events_created'
+    )
     date_time = models.DateTimeField()
     venue = models.CharField(max_length=255, null=True, blank=True)  
     event_type = models.CharField(max_length=10, choices=EVENT_TYPES)
@@ -47,7 +51,9 @@ class Event(models.Model):
     is_approved = models.BooleanField(default=False)
     
     class Meta:
+        app_label = 'events'
         db_table = 'events_table'
+        
 
     def __str__(self):
         return self.title
@@ -75,6 +81,7 @@ class Opportunity(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='opportunities_created')
     salary = models.CharField(max_length=255, blank=True, null=True)
     class Meta:
+        app_label = 'events'
         db_table = 'opportunities_table'
 
     def __str__(self):
@@ -94,6 +101,7 @@ class InternshipApplication(models.Model):
     internship = models.ForeignKey(Opportunity, on_delete=models.CASCADE)
 
     class Meta:
+        app_label = 'events'
         db_table= 'internship_application_table'
 
     def __str__(self):
@@ -113,6 +121,7 @@ class JobApplication(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = 'events'
         db_table = 'job_application_table'
 
     def __str__(self):
@@ -160,6 +169,7 @@ class ResourceShare(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     
     class Meta:
+        app_label = 'events'
         db_table = 'resource_share_table'
 
     def __str__(self):

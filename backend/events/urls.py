@@ -1,4 +1,4 @@
-from .views import EventCreateView, EventList, EventDeleteView, EventApproveView, EventListForUser ,UserEventListView, EventUpdateView, OpportunityListCreate , OpportunityDetail, OpportunityApproveView,InternshipListView, InternshipAppliedListView, InternshipApplicationCreateView, ListOfInternshipApplicant, JobApplicationListView, JobOpportunityListView , JobApplicationCreateView, InternshipApplicationStatusUpdateView, JobApplicationStatusUpdateView, JobApplicatiedListView ,  ResourceShareCreateView , AccessResourceShareView , EventDetailForUser
+from .views import EventCreateView, EventList, EventDeleteView, EventApproveView, EventListForUser ,UserEventListView, EventUpdateView, OpportunityListCreate , OpportunityDetail, OpportunityApproveView,InternshipListView, InternshipAppliedListView, InternshipApplicationCreateView, ListOfInternshipApplicant, JobApplicationListView, JobOpportunityListView , JobApplicationCreateView, InternshipApplicationStatusUpdateView, JobApplicationStatusUpdateView, JobApplicatiedListView ,  ResourceShareCreateView , AccessResourceShareView , EventDetailForUser ,DeleteResourceShareView
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
@@ -17,7 +17,7 @@ urlpatterns = [
     path('internships/', InternshipListView.as_view(), name='internship-list'),
     path('jobs/', JobOpportunityListView.as_view(), name='job-list'),
     path('apply-internship/', InternshipApplicationCreateView.as_view(), name='apply-internship'),
-    path('internship-applicant', ListOfInternshipApplicant.as_view(), name='intern-applicant'),
+    path('internship-applicant/', ListOfInternshipApplicant.as_view(), name='intern-applicant'),
     path('internship-applications/<int:id>/status/', InternshipApplicationStatusUpdateView.as_view(), name='update-internship-application-status'),
     path('job-applications/<int:id>/status/', JobApplicationStatusUpdateView.as_view(), name='update-job-application-status'),
     path('job-applicant/', JobApplicationListView.as_view(), name='job-applicant'),
@@ -26,6 +26,7 @@ urlpatterns = [
     path('internship-applied/', InternshipAppliedListView.as_view(), name='internship-applied'),
     path('resource-share/',  ResourceShareCreateView.as_view(), name='resource-share'),
     path('access-resource-share/', AccessResourceShareView.as_view(), name='access-resource-share'),
+    path('delete-resource-share/<int:pk>/', DeleteResourceShareView.as_view(), name='delete-resource-share'),    
     path('event-lists/', EventListForUser.as_view(),name='EventList'),
     path('event-lists/<int:pk>/', EventDetailForUser.as_view(), name='EventDetail'),
 ]

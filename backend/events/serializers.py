@@ -1,11 +1,13 @@
 
 from rest_framework import serializers
 from .models import Event, Opportunity, InternshipApplication, JobApplication , ResourceShare
-from users.serializers import CompanyProfileSerializer , StaffProfileSerializer
-from users.models import CompanyProfile , StaffProfile
+from users.serializers import CompanyProfileSerializer , StaffProfileSerializer ,AlumniProfileSerializer
+from users.models import CompanyProfile , StaffProfile, AlumniProfile
 
 class EventSerializer(serializers.ModelSerializer):
     company_profile = serializers.SerializerMethodField()
+    alumni_profile = serializers.SerializerMethodField()
+    staff_profile = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -22,6 +24,8 @@ class EventSerializer(serializers.ModelSerializer):
             'is_approved',
             'created_by',
             'company_profile',
+            'alumni_profile',
+            'staff_profile',
         ]
         read_only_fields = ['created_by', 'is_approved']
 
@@ -30,6 +34,20 @@ class EventSerializer(serializers.ModelSerializer):
             company_profile = CompanyProfile.objects.get(user=obj.created_by)
             return CompanyProfileSerializer(company_profile).data  
         except CompanyProfile.DoesNotExist:
+            return None  
+
+    def get_alumni_profile(self, obj):
+        try:
+            alumni_profile = AlumniProfile.objects.get(user=obj.created_by)
+            return AlumniProfileSerializer(alumni_profile).data  
+        except AlumniProfile.DoesNotExist:
+            return None  
+
+    def get_staff_profile(self, obj):
+        try:
+            staff_profile = StaffProfile.objects.get(user=obj.created_by)
+            return StaffProfileSerializer(staff_profile).data  
+        except StaffProfile.DoesNotExist:
             return None  
 
 class OpportunitySerializer(serializers.ModelSerializer):
@@ -200,4 +218,4 @@ class ResourceShareAccessSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ResourceShare
-        fields = ['staff', 'department', 'batch', 'course', 'resource_type', 'title', 'description', 'file', 'url', 'StaffProfile', 'created_on']
+        fields = ['id','staff', 'department', 'batch', 'course', 'resource_type', 'title', 'description', 'file', 'url', 'StaffProfile', 'created_on']

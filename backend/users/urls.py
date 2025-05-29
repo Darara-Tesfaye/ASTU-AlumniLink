@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import forgot_password, StudentProfileCreateView,  ObtainTokenPairView,LoginView , UserCountsView, UserSearchView ,ConnectionViewSet ,StaffProfileCreateView,CompanyCreateView, MentorSearchView, AlumniProfileView, AlumniProfileCreateView, AlumniProfileUpdateView , StudentProfileUpdateView ,StudentProfileFetchView, CompanyProfileUpdateView, CompanyProfileView , NotificationListView , NotificationDetailView
+from .views import forgot_password, StudentProfileCreateView, CompanyVerifyView, UserManagementView,UserDeleteView, ObtainTokenPairView,LoginView , UserCountsView, UserSearchView ,ConnectionViewSet ,StaffProfileCreateView,CompanyCreateView, MentorSearchView, AlumniProfileView, AlumniProfileCreateView, AlumniProfileUpdateView , StudentProfileUpdateView ,StudentProfileFetchView, CompanyProfileUpdateView, CompanyProfileView , NotificationListView , NotificationDetailView ,RecommendedMentorView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
@@ -19,10 +19,16 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='user-login'),
     path('search/', UserSearchView.as_view(), name='user-search'),
     path('search-mentor/', MentorSearchView.as_view(), name='Find-mentor'),
+    path('recommended-mentors/' ,RecommendedMentorView.as_view(), name='Recommended Mentor'),
     path('profile/', AlumniProfileView.as_view() , name='user-profile'),
     path('student/profile/', StudentProfileFetchView.as_view(), name='student_profile'),
     path('company/profile/', CompanyProfileView.as_view(), name='company_profile'),
     path('usercounts/', UserCountsView.as_view(), name='user_counts'),
+    
+    path('user_management/', UserManagementView.as_view(), name='user-management'),
+    path('verify-company/<int:pk>/' , CompanyVerifyView.as_view(), name='verify Company'),
+    path('delete/<int:pk>/', UserDeleteView.as_view(), name='user-delete'),
+
     
     path('connections/', ConnectionViewSet.as_view({'post': 'create'}), name='create_connection'),  
     path('connections/<int:pk>/accept/', ConnectionViewSet.as_view({'post': 'accept'}), name='accept_connection'),  

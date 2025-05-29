@@ -1,14 +1,16 @@
-from .models import Notification
 import logging
+from .models import Notification
 
-def create_notification(user, notification_type, message, event=None):
+def create_notification(user, notification_type, message, event=None, db_alias='default'):
     try:
-        Notification.objects.create(
+        notification = Notification.objects.using(db_alias).create(
             user=user,
             notification_type=notification_type,
             message=message,
-            event=event 
+            event=event
         )
-        logging.error(f"Notification created for user : {message}")
+        logging.info(f"Notification created for user in {db_alias} database: {message}")
+        return notification
     except Exception as e:
-        logging.error(f"Failed to create notification: {str(e)}")
+        logging.error(f"Failed to create notification in {db_alias} database: {str(e)}")
+        return None

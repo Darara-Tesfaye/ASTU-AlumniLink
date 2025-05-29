@@ -1,117 +1,326 @@
-import Sidebar from "./Sidebar";
-import React, { useState } from "react";
-// import Navbar from "../../Components/Navbar";
-// import Footer from "../../Components/Footer";
-// import { FaCheck, FaTrash } from "react-icons/fa";
+// import React, { useState, useEffect } from 'react';
+// import { useNavigate, useLocation } from 'react-router-dom';
+// import { ToastContainer, toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
+// import axios from 'axios';
+// import { ACCESS_TOKEN } from '../../constants';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faTrash } from "@fortawesome/free-solid-svg-icons";
+// const BASE_URL = import.meta.env.VITE_users_API_URL || 'http://localhost:8000';
+
+// const ManageUsers = () => {
+//   const [users, setUsers] = useState([]);
+//   const navigate = useNavigate();
+//   const accessToken = localStorage.getItem(ACCESS_TOKEN);
+//   const location = useLocation();
+//   const { user, profile } = location.state || {};
+
+//   console.log(user);
+
+//   useEffect(() => {
+//     const fetchUsers = async () => {
+//       try {
+//         const response = await axios.get(`${BASE_URL}/users/user_management/`, {
+//           headers: { Authorization: `Bearer ${accessToken}` },
+//         });
+//         console.log('Fetch users response:', response.data);
+//         const sortedUsers = response.data.sort((a, b) => {
+//           const isCompanyA = a.usertype.toLowerCase() === 'company';
+//           const isCompanyB = b.usertype.toLowerCase() === 'company';
+//           const isVerifiedA = a.is_verified;
+//           const isVerifiedB = b.is_verified;
+
+//           // Prioritize unverified companies
+//           if (isCompanyA && !isVerifiedA && (!isCompanyB || isVerifiedB)) return -1;
+//           if (isCompanyB && !isVerifiedB && (!isCompanyA || isVerifiedA)) return 1;
+
+//           // Within groups, sort by joined_date (most recent first)
+//           const dateA = new Date(a.joined_date || '1970-01-01');
+//           const dateB = new Date(b.joined_date || '1970-01-01');
+//           return dateB - dateA;
+//         });
+//         setUsers(sortedUsers);
+//       } catch (error) {
+//         toast.error('Failed to fetch users');
+//         console.error('Fetch users error:', error);
+//       }
+//     };
+//     fetchUsers();
+//   }, [accessToken]);
+
+//   const handleDelete = async (userId) => {
+//     if (window.confirm('Are you sure you want to delete this user?')) {
+//       try {
+//         const response = await axios.delete(`${BASE_URL}/users/delete/${userId}/`, {
+//           headers: { Authorization: `Bearer ${accessToken}` },
+//         });
+//         console.log('Delete response:', response.data);
+//         setUsers(users.filter((user) => user.user_id !== userId));
+//         toast.success('User deleted successfully');
+//       } catch (error) {
+//         toast.error('Failed to delete user');
+//         console.error('Delete error:', error);
+//       }
+//     }
+//   };
+
+//   const handleVerify = async (userId) => {
+//     try {
+//       const response = await axios.patch(
+//         `${BASE_URL}/users/user_management/${userId}/`,
+//         { is_verified: true },
+//         { headers: { Authorization: `Bearer ${accessToken}` } }
+//       );
+//       console.log('Verify response:', response.data);
+//       setUsers(
+//         users.map((user) =>
+//           user.user_id === userId ? { ...user, is_verified: true } : user
+//         )
+//       );
+//       toast.success('User verified successfully');
+//     } catch (error) {
+//       toast.error('Failed to verify user');
+//       console.error('Verify error:', error);
+//     }
+//   };
+
+//   return (
+//     <div className="container mx-auto p-4 sm:p-6">
+//       <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">User Management</h1>
+//       <div className="overflow-x-auto">
+//         <table className="min-w-full bg-white shadow-md rounded-lg">
+//           <thead className="bg-gray-200">
+//             <tr>
+//               <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Profile</th>
+//               <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Name</th>
+//               <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Email</th>
+//               <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">User Type</th>
+//               <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Verified (Company)</th>
+//               <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Actions</th>
+//             </tr>
+//           </thead>
+//           <tbody className="regform_body">
+//             {users.map((user) => (
+//               <tr key={user.user_id} className="border-b">
+//                 <td className="py-3 px-4">
+//                   <img
+//                     src={
+//                       user.profile.profile_pic ||
+//                       user.profile.profile_picture ||
+//                       `${BASE_URL}/media/Profile_Picture/default.jpg`
+//                     }
+//                     alt={`${user.full_name}'s profile`}
+//                     className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover"
+//                     onError={(e) => {
+//                       e.target.src = `${BASE_URL}/media/Profile_Picture/default.jpg`;
+//                     }}
+//                   />
+//                 </td>
+//                 <td className="py-3 px-4 text-sm sm:text-base">{user.full_name}</td>
+//                 <td className="py-3 px-4 text-sm sm:text-base">{user.email}</td>
+//                 <td className="py-3 px-4 text-sm sm:text-base capitalize">{user.usertype}</td>
+//                 <td className="py-3 px-4 text-sm sm:text-base">
+//                   {user.usertype.toLowerCase() === 'company' ? (user.is_verified ? 'Yes' : 'No') : '-'}
+//                 </td>
+//                 <td className="py-3 px-4">
+//                   <div className="flex flex-col sm:flex-row gap-2">
+//                     <button
+//                       onClick={() =>
+//                         navigate(`/profile/${user.user_id}`, {
+//                           state: { user, profile: user.profile },
+//                         })
+//                       }
+//                       className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm sm:text-base"
+//                     >
+//                       View More
+//                     </button>
+//                     <button
+//                       onClick={() => handleDelete(user.user_id)}
+//                       className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm sm:text-base"
+//                     >
+//                       Delete
+//                     </button>
+//                     {user.usertype.toLowerCase() === 'company' && !user.is_verified && (
+//                       <button
+//                         onClick={() => handleVerify(user.user_id)}
+//                         className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm sm:text-base"
+//                       >
+//                         Verify
+//                       </button>
+//                     )}
+//                   </div>
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       </div>
+//       <ToastContainer position="top-right" autoClose={3000} />
+//     </div>
+//   );
+// };
+
+// export default ManageUsers;
+
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { ACCESS_TOKEN } from '../../constants';
+
+const BASE_URL = import.meta.env.VITE_users_API_URL || 'http://localhost:8000';
 
 const ManageUsers = () => {
-  const [users, setUsers] = useState([
-    { id: 1, name: "John Doe", role: "Student", email: "john@astu.edu", status: "Pending" },
-    { id: 2, name: "Jane Smith", role: "Alumni", email: "jane@company.com", status: "Approved" },
-    { id: 3, name: "Dr. Mark Lee", role: "Faculty", email: "mark@astu.edu", status: "Pending" },
-    { id: 4, name: "TechCorp", role: "Company", email: "hr@techcorp.com", status: "Approved" },
-  ]);
+  const [users, setUsers] = useState([]);
+  // const [currentUser, setCurrentUser] = useState(null);
+  const navigate = useNavigate();
+  const accessToken = localStorage.getItem(ACCESS_TOKEN);
+  const location = useLocation();
+  const { user, profile } = location.state || {};
+  const currentUser = {user};
+  console.log("Current user" ,currentUser);
 
-  const approveUser = (id) => {
-    setUsers(users.map(user => (user.id === id ? { ...user, status: "Approved" } : user)));
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/users/user_management/`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        console.log('Fetch users response:', response.data);
+        const sortedUsers = response.data.sort((a, b) => {
+          const isCompanyA = a.usertype.toLowerCase() === 'company';
+          const isCompanyB = b.usertype.toLowerCase() === 'company';
+          const isVerifiedA = a.is_verified;
+          const isVerifiedB = b.is_verified;
+
+          if (isCompanyA && !isVerifiedA && (!isCompanyB || isVerifiedB)) return -1;
+          if (isCompanyB && !isVerifiedB && (!isCompanyA || isVerifiedA)) return 1;
+
+          const dateA = new Date(a.joined_date || '1970-01-01');
+          const dateB = new Date(b.joined_date || '1970-01-01');
+          return dateB - dateA;
+        });
+        setUsers(sortedUsers);
+      } catch (error) {
+        toast.error('Failed to fetch users');
+        console.error('Fetch users error:', error);
+      }
+    };
+
+    if (accessToken) {
+      fetchUsers();
+    }
+  }, [accessToken]);
+
+  const handleDelete = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        const response = await axios.delete(`${BASE_URL}/users/delete/${userId}/`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        console.log('Delete response:', response.data);
+        setUsers(users.filter((user) => user.user_id !== userId));
+        toast.success('User deleted successfully');
+      } catch (error) {
+        toast.error('Failed to delete user');
+        console.error('Delete error:', error);
+      }
+    }
   };
 
-  const deleteUser = (id) => {
-    setUsers(users.filter(user => user.id !== id));
+  const handleVerify = async (userId) => {
+    try {
+      const response = await axios.patch(
+        `${BASE_URL}/users/verify-company/${userId}/`,
+        { is_verified: true },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      console.log('Verify response:', response.data);
+      setUsers(
+        users.map((user) =>
+          user.user_id === userId ? { ...user, is_verified: true } : user
+        )
+      );
+      toast.success('User verified successfully');
+    } catch (error) {
+      toast.error('Failed to verify user');
+      console.error('Verify error:', error);
+    }
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen flex flex-col">
-      <Sidebar />
-      <div className="flex-1 max-w-[90rem] mx-auto px-4 sm:px-6 py-8 sm:py-12 lg:py-16">
-        {/* Title */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-6 sm:mb-8 tracking-tight animate-fade-in-down">
-          Manage Users
-        </h1>
-
-        {/* Users Table Card */}
-        <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl bg-gradient-to-br from-white to-blue-50 border border-blue-100 animate-fade-in-up max-w-7xl mx-auto">
-          {users.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-200">
-                <thead>
-                  <tr className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md">
-                    <th className="p-3 sm:p-4 text-left text-sm sm:text-base font-semibold border border-gray-200 rounded-tl-xl">
-                      Name
-                    </th>
-                    <th className="p-3 sm:p-4 text-left text-sm sm:text-base font-semibold border border-gray-200">
-                      Role
-                    </th>
-                    <th className="p-3 sm:p-4 text-left text-sm sm:text-base font-semibold border border-gray-200">
-                      Email
-                    </th>
-                    <th className="p-3 sm:p-4 text-left text-sm sm:text-base font-semibold border border-gray-200">
-                      Status
-                    </th>
-                    <th className="p-3 sm:p-4 text-left text-sm sm:text-base font-semibold border border-gray-200 rounded-tr-xl">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user, index) => (
-                    <tr
-                      key={user.id}
-                      className={`transition-colors duration-200 border border-gray-200 ${
-                        index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                      } hover:bg-blue-100 hover:shadow-md`}
+    <div className="container mx-auto p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center">User Management</h1>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white shadow-md rounded-lg">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Profile</th>
+              <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Name</th>
+              <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Email</th>
+              <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">User Type</th>
+              <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Verified (Company)</th>
+              <th className="py-3 px-4 text-left text-sm sm:text-base font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="regform_body">
+            {users.map((user) => (
+              <tr key={user.user_id} className="border-b">
+                <td className="py-3 px-4">
+                  <img
+                    src={
+                      user.profile.profile_pic ||
+                      user.profile.profile_picture ||
+                      `${BASE_URL}/media/Profile_Picture/default.jpg`
+                    }
+                    alt={`${user.full_name}'s profile`}
+                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover"
+                    onError={(e) => {
+                      e.target.src = `${BASE_URL}/media/Profile_Picture/default.jpg`;
+                    }}
+                  />
+                </td>
+                <td className="py-3 px-4 text-sm sm:text-base">{user.full_name}</td>
+                <td className="py-3 px-4 text-sm sm:text-base">{user.email}</td>
+                <td className="py-3 px-4 text-sm sm:text-base capitalize">{user.usertype}</td>
+                <td className="py-3 px-4 text-sm sm:text-base">
+                  {user.usertype.toLowerCase() === 'company' ? (user.is_verified ? 'Yes' : 'No') : '-'}
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      onClick={() =>
+                        navigate(`/profile/${user.user_id}`, {
+                          state: { user, profile: user.profile, currentUser },
+                        })
+                      }
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm sm:text-base"
                     >
-                      <td className="p-3 sm:p-4 text-gray-800 text-sm sm:text-base font-medium border border-gray-200">
-                        {user.name}
-                      </td>
-                      <td className="p-3 sm:p-4 text-gray-800 text-sm sm:text-base font-medium border border-gray-200">
-                        {user.role}
-                      </td>
-                      <td className="p-3 sm:p-4 text-gray-800 text-sm sm:text-base font-medium border border-gray-200">
-                        {user.email}
-                      </td>
-                      <td
-                        className={`p-3 sm:p-4 font-semibold text-sm sm:text-base border border-gray-200 ${
-                          user.status === "Approved"
-                            ? "text-green-600 animate-pulse-once"
-                            : "text-yellow-600 animate-pulse-once"
-                        }`}
+                      View More
+                    </button>
+                    <button
+                      onClick={() => handleDelete(user.user_id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm sm:text-base"
+                    >
+                      Delete
+                    </button>
+                    {user.usertype.toLowerCase() === 'company' && !user.is_verified && (
+                      <button
+                        onClick={() => handleVerify(user.user_id)}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm sm:text-base"
                       >
-                        {user.status}
-                      </td>
-                      <td className="p-3 sm:p-4 border border-gray-200">
-                        <div className="flex space-x-2 sm:space-x-3">
-                          {user.status === "Pending" && (
-                            <button
-                              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold px-4 sm:px-5 py-2 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-[1.05] hover:shadow-lg text-sm sm:text-base flex items-center space-x-1"
-                              onClick={() => approveUser(user.id)}
-                            >
-                              <faCheck /> <span>Approve</span>
-                            </button>
-                          )}
-                          <button
-                            className="bg-gradient-to-r from-red-500 to-rose-600 text-white font-semibold px-4 sm:px-5 py-2 rounded-lg hover:from-red-600 hover:to-rose-700 transition-all duration-300 transform hover:scale-[1.05] hover:shadow-lg text-sm sm:text-base flex items-center space-x-1"
-                            onClick={() => deleteUser(user.id)}
-                          >
-                            <faTrash /> <span>Delete</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-center text-gray-600 text-sm sm:text-base font-medium animate-fade-in">
-              No users available to manage.
-            </p>
-          )}
-        </div>
+                        Verify
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

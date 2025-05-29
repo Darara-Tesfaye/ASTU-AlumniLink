@@ -8,7 +8,7 @@ const Header = ({ toggleSidebar }) => {
     const location = useLocation();
     const { user } = location.state || {};
     return (
-        <header className="bg-white text-black flex justify-between items-center p-4 border-b-2 border-customGray sidebar">
+       <header className="bg-white text-black flex justify-between items-center p-4 border-b-2 border-customGray sidebar fixed top-0 left-0 w-full z-50">
             <div className="flex items-center">
                 <button onClick={toggleSidebar} className="md:hidden">
                     <FontAwesomeIcon icon={faBars} className="text-xl" />

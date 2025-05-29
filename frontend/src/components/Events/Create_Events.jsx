@@ -51,7 +51,6 @@ const CreateEventForm = () => {
         const response = await axios.get(`${BASE_URL}/events/user-events/`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
-        // Normalize participants to ensure it's always an array
         const events = response.data.map((event) => ({
           ...event,
           participants: Array.isArray(event.participants) ? event.participants : [],
@@ -192,7 +191,7 @@ console.log(userEvents);
       return false;
     }
     const hasStudents = participantTypes.includes('students');
-    const hasAlumni = participantTypes.includes('alumni');
+    const hasAlumni = participantTypes.includes('Alumni');
     const hasOtherTypes = participantTypes.some((type) => ['staff', 'company'].includes(type));
     return (hasStudents && !hasAlumni && !hasOtherTypes) || (hasAlumni && !hasStudents && !hasOtherTypes);
   };
@@ -200,7 +199,6 @@ console.log(userEvents);
   return (
     <div className="max-w-8xl mx-auto mb-12 p-8 bg-white rounded-xl shadow-lg create-form">
       <ToastContainer />
-      {/* Your Events Section */}
       <div className="mb-10">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4 dark_text">Your Events</h2>
         {userEvents.length > 0 ? (

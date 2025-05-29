@@ -19,7 +19,7 @@ const ApplicantPage = () => {
     const fetchListOfInternApplicants = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${BASE_URL}/events/internship-applicant`, {
+            const response = await fetch(`${BASE_URL}/events/internship-applicant/`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
                 },

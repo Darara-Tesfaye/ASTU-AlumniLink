@@ -8,6 +8,7 @@ class Feedback(models.Model):
     email = models.EmailField()
     subject = models.CharField(max_length=255)
     message = models.TextField()
+    created_on = models.DateTimeField(auto_now=True)
     affiliation = models.CharField(max_length=50)
 
     def __str__(self):
@@ -34,5 +35,6 @@ class Message(models.Model):
     viewed = models.BooleanField(default=False)
 
     class Meta:
+        app_label = 'contactapp'
         db_table = 'contactapp_message'
         

@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
             'usertype',
             'password',
             'areas_of_interest',
-            'last_login'
+            'last_login',            
         ]
         
   
@@ -35,6 +35,13 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+# Serializer for Verify Company
+class CompanyVerifySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['is_verified']
+        
+        
 class StudentProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
@@ -80,7 +87,6 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
         if errors:
             raise serializers.ValidationError(errors)
-
         return attrs
 
     def create(self, validated_data):
@@ -215,6 +221,17 @@ class StaffProfileSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         user_data = attrs.pop('user')
+        
+        full_name = user_data.get('full_name', '')
+        password = user_data.get('password', '')
+
+        if ' ' not in full_name:
+            raise serializers.ValidationError("Full name must contain a space between first name and last name.")
+
+        if len(password) < 8 or not any(char.isdigit() for char in password) or \
+                not any(char.isalpha() for char in password) or \
+                not any(char in '!@#$%^&*()_+[]{}|;:,.<>?/' for char in password):
+            raise serializers.ValidationError("Password must be at least 8 characters long and contain at least one letter, one number, and one special character.")
         attrs['user'] = user_data  
         return attrs
 
@@ -244,6 +261,14 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         user_data = attrs.pop('user')
+        password = user_data.get('password', '')
+
+        # Password Validation
+        if len(password) < 8 or not any(char.isdigit() for char in password) or \
+                not any(char.isalpha() for char in password) or \
+                not any(char in '!@#$%^&*()_+[]{}|;:,.<>?/' for char in password):
+            raise serializers.ValidationError("Password must be at least 8 characters long and contain at least one letter, one number, and one special character.")
+
         attrs['user'] = user_data  
         return attrs
 
@@ -301,7 +326,7 @@ class UserSearchSerializer(serializers.Serializer):
     department = serializers.CharField(required=True)
     areas_of_interest = serializers.JSONField(required=True)
 class MentorSearchSerializer(serializers.ModelSerializer):
-    alumni_profile = AlumniProfileSerializer(read_only=True)
+    alumni_profile = AlumniProfileUpdateSerializer(read_only =True)
     staff_profile = StaffProfileSerializer(read_only=True)
      
     class Meta:

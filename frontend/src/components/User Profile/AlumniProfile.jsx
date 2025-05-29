@@ -13,7 +13,7 @@ const AlumniProfile = () => {
     const { user } = location.state || {};
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [isEditing, setIsEditing] = useState(false); //
+    const [isEditing, setIsEditing] = useState(false); 
     const BASE_URL = import.meta.env.VITE_users_API_URL;
     const email = user?.email;
     const [selectedFile, setSelectedFile] = useState(null);
@@ -99,8 +99,6 @@ const AlumniProfile = () => {
         }
     }, [email]);
 
-    console.log(userData);
-
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
     };
@@ -110,6 +108,7 @@ const AlumniProfile = () => {
             ...prevUserData,
             [name]: value,
         }));
+       
     };
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -166,6 +165,7 @@ const AlumniProfile = () => {
             toast.error("Access token is missing. Please try again.");
             return;
         }
+         
         const workHistorySet = new Set();
         for (const entry of userData.work_history) {
             if (workHistorySet.has(entry.company + entry.position)) {
@@ -491,9 +491,9 @@ const AlumniProfile = () => {
                                                     <input
                                                         type="text"
                                                         name="position"
-                                                        value={entry.position || ''} // Ensure fallback to an empty string
+                                                        value={entry.position || ''} 
                                                         onChange={(e) => handleWorkHistoryChange(index, e)}
-                                                        className="border p-1 rounded w-full"
+                                                        className="border p-1 rounded w-full bg-transparent"
                                                     />
                                                 </label>
                                                 <label>
@@ -503,7 +503,7 @@ const AlumniProfile = () => {
                                                         name="company"
                                                         value={entry.company || ''}
                                                         onChange={(e) => handleWorkHistoryChange(index, e)}
-                                                        className="border p-1 rounded w-full"
+                                                        className="border p-1 rounded w-full bg-transparent"
                                                     />
                                                 </label>
                                                 <label>
@@ -511,9 +511,9 @@ const AlumniProfile = () => {
                                                     <input
                                                         type="text"
                                                         name="start_year"
-                                                        value={entry.start_year || ''} // Ensure fallback to an empty string
+                                                        value={entry.start_year || ''} 
                                                         onChange={(e) => handleWorkHistoryChange(index, e)}
-                                                        className="border p-1 rounded w-full"
+                                                        className="border p-1 rounded w-full bg-transparent"
                                                     />
                                                 </label>
                                                 <label>
@@ -521,9 +521,9 @@ const AlumniProfile = () => {
                                                     <input
                                                         type="text"
                                                         name="finish_year"
-                                                        value={entry.finish_year || ''} // Ensure fallback to an empty string
+                                                        value={entry.finish_year || ''} 
                                                         onChange={(e) => handleWorkHistoryChange(index, e)}
-                                                        className="border p-1 rounded w-full"
+                                                        className="border p-1 rounded w-full bg-transparent"
                                                     />
                                                 </label>
                                                 <button

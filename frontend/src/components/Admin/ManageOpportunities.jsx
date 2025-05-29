@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "./Sidebar";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ACCESS_TOKEN } from "../../constants";
@@ -135,30 +134,26 @@ const AdminManageOpportunities = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen flex flex-col">
+    <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen flex flex-col mt-0 regform_body">
       <ToastContainer />
-      <div className="flex flex-1 create-form">
-        <Sidebar isSidebarOpen={true} setIsSidebarOpen={() => { }} />
-        <div className="flex-1 max-w-[90rem] mx-auto px-4 sm:px-6 py-8 sm:py-12 lg:py-16 w-full ml-0 md:ml-16 lg:ml-80">
+      <div className="flex flex-1 regform_body">
+        <div className="flex-1  px-4 sm:px-6 py-4  w-full ml-0 ">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-6 sm:mb-8 tracking-tight">
             Manage Opportunity Listings
           </h1>
 
-          {/* Opportunities Table Card */}
-          <div className="bg-white p-4 sm:p-6 sm:px-16 lg:p-8 rounded-xl shadow-xl from-white to-blue-50 border border-blue-100 ml-0 opportunity_table_container">
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-4 sm:mb-6 tracking-wide black_text">
+          <div className="bg-white p-4 sm:p-6 sm:px-16 lg:p-8 rounded-xl shadow-xl from-white to-blue-50 border border-blue-100 ml-0 regform_body">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-4 sm:mb-6 tracking-wide dark_text">
               Opportunity Listings
             </h2>
             {opportunities.length > 0 ? (
-              <div className="overflow-x-auto opportunity_table">
-                <table className="w-full border-collapse border border-gray-200 opportunity_table">
+              <div className="overflow-x-auto event_table_conatiner ">
+                <table className="w-full border-collapse border border-gray-200">
                   <thead>
-                    <tr className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white opportunity_table">
-                      <th className="p-3 sm:p-4 text-left opportunity_table">Title</th>
-                      <th className="p-3 sm:p-4 text-left opportunity_table">Description</th>
-
-
-                      <th className="p-3 sm:p-4 text-left opportunity_table">Actions</th>
+                    <tr className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white  event_table">
+                      <th className="p-3 sm:p-4 text-left  contact-form">Title</th>
+                      <th className="p-3 sm:p-4 text-left  contact-form">Description</th>
+                      <th className="p-3 sm:p-4 text-left  contact-form">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -187,7 +182,7 @@ const AdminManageOpportunities = () => {
                           </td>
                         </tr>
                         {expandedOpportunityId === opportunity.id && (
-                          <tr className="bg-blue-100">
+                          <tr className="bg-blue-100 contact-form">
                             <td colSpan="6" className="p-4">
                               <h3 className="font-semibold text-center tracking-wide bg-gradient-to-r from-orange-500 to-red-800 text-transparent bg-clip-text">Opportunity Details</h3>
                               <p><strong>Description:</strong> {opportunity.description}</p>

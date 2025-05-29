@@ -20,7 +20,7 @@ const AccessResources = () => {
 
     useEffect(() => {
         const fetchResources = async () => {
-         setLoading(true);
+            setLoading(true);
             try {
                 const response = await fetch(`${BASE_URL}/events/access-resource-share/`, {
                     method: 'GET',
@@ -43,11 +43,11 @@ const AccessResources = () => {
 
         fetchResources();
     }, [navigate, profile]);
-console.log("Resources", resources);
+    console.log("Resources", resources);
     const fuse = useMemo(() => {
         return new Fuse(resources, {
             keys: ['course'],
-            threshold: 0.4, 
+            threshold: 0.4,
             includeScore: true,
             minMatchCharLength: 1,
         });
@@ -66,7 +66,7 @@ console.log("Resources", resources);
             window.open(resource.url, '_blank', 'noopener,noreferrer');
         } else {
             const fileUrl = resource.file.startsWith('http') ? resource.file : `${BASE_URL}${resource.file}`;
-            window.location.href = fileUrl; 
+            window.location.href = fileUrl;
         }
     };
 
@@ -144,7 +144,29 @@ console.log("Resources", resources);
                                 </p>
                                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                                     <p><strong>Course:</strong> {resource.course}</p>
-                                    <p><strong>Shared by:</strong>{' '+ resource.StaffProfile.user.full_name}</p>
+                                    <p className="text-sm text-gray-500 mb-2">
+                                        <span className="font-semibold">Shared by:</span>{' '}
+                                        <button
+                                            onClick={() =>
+                                                navigate(`/profile/${resource.StaffProfile.user.id}`, {
+                                                    state: {
+                                                        user: {
+                                                            user_id: resource.StaffProfile.user.id,
+                                                            full_name: resource.StaffProfile.user.full_name,
+                                                            email: resource.StaffProfile.user.email,
+                                                            usertype: resource.StaffProfile.user.usertype || 'staff',
+                                                        },
+                                                        profile: resource.StaffProfile || {},
+                                                        currentUser: user,
+                                                    },
+                                                })
+                                            }
+                                            className="text-blue-500 hover:underline"
+                                            aria-label={`View profile of ${resource.StaffProfile.user.full_name}`}
+                                        >
+                                            {resource.StaffProfile.user.full_name}
+                                        </button>
+                                    </p>
                                     <p><strong>Type:</strong> {resource.resource_type.charAt(0).toUpperCase() + resource.resource_type.slice(1)}</p>
                                     <p><strong>Shared On:</strong> {new Date(resource.created_on).toLocaleDateString()}</p>
                                 </div>

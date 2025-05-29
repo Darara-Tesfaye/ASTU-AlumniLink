@@ -27,6 +27,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     areas_of_interest = models.JSONField(default=list, blank=True, null=True)    
     joined_date = models.DateTimeField(default=timezone.now) 
     last_login = models.DateTimeField(default=timezone.now)
+    is_verified = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 
@@ -80,6 +81,7 @@ class StudentProfile(models.Model):
 
     def __str__(self):
         return self.user.email
+    
 class AlumniProfile(models.Model):
     QUALIFICATION_CHOICES = [
         ('Bachelor', 'Bachelor'),
@@ -171,7 +173,6 @@ class StaffProfile(models.Model):
     qualifications = models.CharField(max_length=50, choices=QUALIFICATION_CHOICES)
     years_of_experience = models.IntegerField() 
     expertise = models.TextField()  
-    # areas_of_interest = models.JSONField(blank=True, null=True)
     class Meta:
         db_table = 'staff_profile'
 
@@ -236,7 +237,9 @@ class Notification(models.Model):
         ('new_message', 'New Message'),   
         ('new_opportunity', 'New Opportunity'),     
         ('internship_application_status', 'Internship Application Status'),
-        ('job_application_status', 'Job Application Status'),      
+        ('job_application_status', 'Job Application Status'), 
+        ('event_deleted', 'Event Deleted'),
+        ('new_event', 'New Event'),  
     )
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -245,7 +248,7 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=True)
-
+   
     class Meta:
         db_table = 'notification'
         ordering = ['-created_at']

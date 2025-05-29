@@ -13,7 +13,6 @@ const StudentProfile = () => {
     const [error, setError] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
-
     const BASE_URL = import.meta.env.VITE_users_API_URL;
     const email = user?.email;
     const [studentData, setstudentData] = useState({
@@ -103,9 +102,6 @@ const StudentProfile = () => {
         }
     }, [email]);
 
-    console.log(studentData.professional_experiences)
-
-
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
     };
@@ -118,6 +114,38 @@ const StudentProfile = () => {
         }));
     };
 
+const validatePhoneNumber = (value) => {
+        if (!value) return '';
+
+        const digits = value.replace(/\D/g, '');
+        const startsWithPlus = value.startsWith('+');
+
+        const validChars = new Set(digits + (startsWithPlus ? '+' : ''));
+        if (new Set(value).size > validChars.size) {
+            return 'Phone number can only contain digits and an optional leading "+".';
+        }
+
+        if (!digits.startsWith('09') && !digits.startsWith('07') && !(startsWithPlus && value.startsWith('+251'))) {
+            return 'Use Ethiopia country code for phone number.';
+        }
+
+        const digitCount = digits.length;
+        if (value.startsWith('+251')) {
+            if (digitCount !== 12) {
+                return 'Phone number with "+251" must have exactly 13 digits.';
+            }
+        } else if (digits.startsWith('09') || digits.startsWith('07')) {
+            if (digitCount !== 10) {
+                return 'Phone number  must have exactly 10 digits.';
+            }
+        }
+
+        if (value.length > 15) {
+            return 'Phone number cannot exceed 15 characters.';
+        }
+
+        return '';
+    };
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -266,8 +294,7 @@ const StudentProfile = () => {
                 <span style={{ marginRight: '10px' }}>Do you want to update?</span>
                 <button
                     onClick={() => {
-                        handleSubmit();
-                        // toast.dismiss();        
+                        handleSubmit();       
                     }}
                     style={{ border: 'none', paddingLeft: '5px', borderRadius: '2px', background: 'transparent', cursor: 'pointer', marginRight: '15px' }}
                 >
@@ -301,6 +328,11 @@ const StudentProfile = () => {
     const handleSubmit = async (e) => {
         if (e) {
             e.preventDefault();
+        }
+        
+        if(validatePhoneNumber(studentData.phone_number)){
+            toast.error(validatePhoneNumber(studentData.phone_number), { position: "top-right" });
+            return;
         }
      
         const accessToken = localStorage.getItem(ACCESS_TOKEN);

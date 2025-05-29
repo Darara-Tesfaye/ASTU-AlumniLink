@@ -19,7 +19,7 @@ import ProfileLayout from "./components/User Profile/Profilelayout";
 import MentorSearch from "./components/Mentor Search/MentorSearch";
 import MentorSearchLayout from "./components/Mentor Search/MentorSearchLayout";
 import AdminDashboard from "./components/Admin/AdminDashboard";
-// import ManageUsers from "./components/Admin/ManageUsers";
+import ManageUsers from "./components/Admin/ManageUsers";
 import EventsLayout from "./components/Events/EventsLayout";
 import CreateEventForm from "./components/Events/Create_Events";
 
@@ -29,6 +29,9 @@ import ChatPage from "./components/Chat/chat";
 
 import ManageEvents from "./components/Admin/ManageEvents";
 import AdminManageOpportunities from "./components/Admin/ManageOpportunities";
+import FeedbackList from "./components/Admin/Feedback";
+import AdminPageLayout from "./components/Admin/AdminPageLayout";
+import AdminNotifications from "./components/Admin/AdminNotifications";
 
 import ForgotPassword from "./components/forgotPassword";
 import ManageOpportunities from "./components/Opportunity/ManageOpportunity";
@@ -46,6 +49,12 @@ import AccessResources from "./components/Resource Sharing/AccessResource";
 import Notifications from "./components/Notifications";
 import EventDetail from "./components/Events/Eventdetail";
 import UserEventList from "./components/Events/ListEvents";
+import UserProfilePage from "./components/ProfilePage";
+import ForumList from "./components/Forum/ListofDiscussion";
+// import AdminEventForum from "./components/Forum/AdminEventForum";
+import EventForum from "./components/Forum/EventForum";
+import AdminForumDashboard from "./components/Forum/AdminForumPage";
+
 
 import { User } from "lucide-react";
 
@@ -79,7 +88,19 @@ function App() {
           path="/admindashboard"
           element={
             <ProtectedRoute>
-              <AdminDashboard />
+              <AdminPageLayout>
+                <AdminDashboard />
+              </AdminPageLayout>
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/admin-notifications"
+          element={
+            <ProtectedRoute>
+              <AdminPageLayout>
+                <AdminNotifications />
+              </AdminPageLayout>
             </ProtectedRoute>
           }
         />
@@ -93,11 +114,23 @@ function App() {
             </ProtectedRoute>
           }
         />
+          <Route
+          path="/feedback-list"
+          element={
+            <ProtectedRoute>
+              <AdminPageLayout>
+                <FeedbackList />
+              </AdminPageLayout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/admin-opportunities"
           element={
             <ProtectedRoute>
+              <AdminPageLayout>
               <AdminManageOpportunities />
+              </AdminPageLayout>
             </ProtectedRoute>
           }
         />
@@ -239,17 +272,39 @@ function App() {
 
           }
         />
+        <Route 
+        path="/forum-list"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ForumList />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+        />
 
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Registerandlogout />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/#about" element={<LandingPage />} />
+        <Route path="/#contact" element={<LandingPage />} />
         <Route path="/profile" element={
           <ProfileLayout>
             <UserProfile />
           </ProfileLayout>
         } />
+
+        <Route path="/profile/:id"
+         element={
+          <ProtectedRoute>
+            <UserProfilePage />
+          </ProtectedRoute>
+          
+        } />
+
         <Route path="/create-event" element={
           <ProtectedRoute>
             <EventsLayout>
@@ -262,7 +317,44 @@ function App() {
             <MentorSearch />
           </MentorSearchLayout>
         } />
-        <Route path="/events" element={<ManageEvents />} />
+        
+
+        <Route path="/events" 
+        element={
+          <ProtectedRoute>
+            <AdminPageLayout>
+              <ManageEvents />
+            </AdminPageLayout>
+          </ProtectedRoute>
+        } 
+        />
+        <Route path="/manageusers"
+        element={
+          <ProtectedRoute>
+            <AdminPageLayout>
+              <ManageUsers />
+            </AdminPageLayout>
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/admin/forum/event/:eventId" 
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <AdminForumDashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/forum/event/:eventId" 
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <EventForum />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+        />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
 
 

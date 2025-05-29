@@ -4,35 +4,53 @@ import { ACCESS_TOKEN } from "../../constants";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBriefcase, faCalendar, faMapPin, faUsers, faShare, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faBriefcase, faCalendar, faMapPin, faUsers, faShare, faEye, faEyeSlash, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 
 const BrowseInternship = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, profile } = location.state || {};
     const [internships, setInternships] = useState([]);
+    const [appliedInternshipIds, setAppliedInternshipIds] = useState(new Set());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [expanded, setExpanded] = useState({});
     const BASE_URL = import.meta.env.VITE_users_API_URL || 'http://127.0.0.1:8000';
     const userDepartment = profile?.department;
+    const userId = user?.id;
+    const userStudentId = profile?.student_id;
     const today = new Date('2025-05-14');
 
-
     useEffect(() => {
-        const fetchInternships = async () => {
+        const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${BASE_URL}/events/internships/`, {
+                const internshipsResponse = await fetch(`${BASE_URL}/events/internships/`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
                     },
                 });
-                if (!response.ok) {
+                if (!internshipsResponse.ok) {
                     throw new Error('Failed to fetch internships');
                 }
-                const data = await response.json();
-                const internshipArray = Array.isArray(data) ? data : [data];
+                const internshipsData = await internshipsResponse.json();
+                const internshipArray = Array.isArray(internshipsData) ? internshipsData : [internshipsData];
+
+                const appliedResponse = await fetch(`${BASE_URL}/events/internship-applied/?student_id=${userStudentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+                    },
+                });
+                if (!appliedResponse.ok) {
+                    if (appliedResponse.status === 401) {
+                        throw new Error("Unauthorized. Please log in.");
+                    }
+                    throw new Error('Failed to fetch applied internships');
+                }
+                const appliedData = await appliedResponse.json();
+                const appliedIds = new Set(appliedData.map(app => [app.internship, app.status]).flat());
+                setAppliedInternshipIds(appliedIds);
+
                 const sortedInternships = internshipArray.sort((a, b) => {
                     const aStart = new Date(a.start_date);
                     const aEligible = aStart > today && a.departments.includes(userDepartment);
@@ -48,8 +66,9 @@ const BrowseInternship = () => {
                 setLoading(false);
             }
         };
-        fetchInternships();
-    }, [BASE_URL, userDepartment]);
+
+        fetchData();
+    }, [BASE_URL, userDepartment, userId, userStudentId, navigate]);
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -63,7 +82,6 @@ const BrowseInternship = () => {
         return Array.isArray(departments) ? departments.join(', ') : 'Not specified';
     };
 
-    console.log("User Department", userDepartment);
     const getInternshipStatus = (startDate, endDate) => {
         const start = new Date(startDate);
         const end = new Date(endDate);
@@ -104,7 +122,7 @@ const BrowseInternship = () => {
     if (error) {
         return <p className="text-red-500 text-center text-xl mt-10">{error}</p>;
     }
-console.log("Internship", internships);
+
     return (
         <div className="bg-gray-100 min-h-screen p-6 dark:bg-gray-900 regform_body">
             <ToastContainer />
@@ -122,18 +140,29 @@ console.log("Internship", internships);
                             const status = getInternshipStatus(internship.start_date, internship.end_date);
                             const { bg, text } = getStatusStyles(status);
                             const canApply = status === 'future' && internship.departments.includes(userDepartment);
+                            const hasApplied = appliedInternshipIds.has(internship.id);
+                            const Is_Accepted = hasApplied && appliedInternshipIds.get(internship.status) === 'accepted';
+                           console.log(Is_Accepted);
                             const company = internship.company_profile;
                             const isExpanded = expanded[internship.id];
-
+                           
                             return (
                                 <div
                                     key={internship.id}
                                     className={`p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 contact-form ${bg}`}
                                 >
-                                    <h2 className={`text-2xl font-bold mb-4 ${text}`}>
-                                        {internship.title}
-                                        <span className="text-sm ml-2 capitalize">({status})</span>
-                                    </h2>
+                                    <div className="flex justify-between items-start">
+                                        <h2 className={`text-2xl font-bold mb-4 ${text}`}>
+                                            {internship.title}
+                                            <span className="text-sm ml-2 capitalize">({status})</span>
+                                        </h2>
+                                        {hasApplied && (
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                                <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+                                                Applied
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className={`text-lg mb-4 flex items-center ${text}`}>
                                         <FontAwesomeIcon icon={faCalendar} className="mr-2 text-orange-500" />
                                         <span className="font-semibold mr-2">Duration:</span>
@@ -159,7 +188,6 @@ console.log("Internship", internships);
                                             <p className={`text-lg mb-4 ${text}`}>
                                                 <span className="font-semibold">Created On:</span> {formatDate(internship.created_on)}
                                             </p>
-                                          
                                             <p className={`text-lg mb-4 ${text}`}>
                                                 <span className="font-semibold">Created By:</span>{' '}
                                                 {company?.user?.full_name || 'Unknown'}
@@ -187,12 +215,19 @@ console.log("Internship", internships);
                                                 </>
                                             )}
                                         </button>
-                                        {canApply && (
+                                        {canApply && !hasApplied && (
                                             <button
                                                 onClick={() => handleApply(internship.id)}
                                                 className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-white hover:to-white hover:text-blue-600 hover:border-blue-600 border transition-all duration-300 transform hover:scale-105"
                                             >
                                                 Apply Now
+                                            </button>
+                                        )}
+                                        {canApply && hasApplied && (
+                                            <button
+                                                className="mt-4 px-4 py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed opacity-50"
+                                            >
+                                                
                                             </button>
                                         )}
                                     </div>

@@ -19,6 +19,32 @@ class FeedbackCreateView(generics.CreateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializers
     permission_classes = [AllowAny]
+    
+    def perform_create(self, serializer):
+        feedback = serializer.save()
+        
+        admin_users = User.objects.filter(is_superuser=True)  
+        for admin in admin_users:
+            create_notification(
+                user=admin,
+                notification_type='new_feedback',
+                message=f"New feedback received from {feedback.name}: {feedback.message[:50]}...", 
+            )
+    
+    
+class FeedbackFetchView(generics.ListAPIView):
+    queryset =Feedback.objects.all()
+    serializer_class = FeedbackSerializers
+    permission_classes = [AllowAny]
+class FeedbackDeleteView(generics.DestroyAPIView):
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializers
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        feedback = self.get_object()
+        feedback.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class SendMediaMessageView(APIView):
     permission_classes = [IsAuthenticated]

@@ -11,7 +11,9 @@ const ChatPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const friend = state?.friend || {};
-  const user = state?.user || {};
+  const user = state?.user || state?.currentUser || {};
+  console.log("friend" ,friend);
+  
   const BASE_URL = import.meta.env.VITE_users_API_URL;
   const accessToken = localStorage.getItem(ACCESS_TOKEN);
 
@@ -31,8 +33,8 @@ const ChatPage = () => {
   const messagesEndRef = useRef(null);
   const editFormRef = useRef(null);
 
-  const profilePic = friend.profile_pic
-    ? `${BASE_URL}${friend.profile_pic}`
+  const profilePic = friend.profile_pic || friend.profile_picture
+    ? `${BASE_URL}${friend.profile_pic}` || `${BASE_URL}${friend.profile_picture}`
     : `${BASE_URL}/media/Profile_Picture/default.jpg`;
 
   useEffect(() => {

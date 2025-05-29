@@ -8,12 +8,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon, faMapMarkerAlt, faClock, faLongArrowAltRight } from "@fortawesome/free-solid-svg-icons";
 import users_API from "../users_API";
 import LoadingIndicator from '../components/LoadingIndicator';
+import Footer from './Footer';
 
 const navItems = [
   { label: "Home", href: "#" },
-  { label: "Events", href: "#events" }, //Add upcoming events by fetching from database
+  { label: "Events", href: "#events" },
   { label: "About", href: "#about" },
-  { label: "Contact Us", href: "#contact" }, //Add upcoming events by fetching from database
+  { label: "Contact Us", href: "#contact" }, 
 ];
 
 
@@ -300,9 +301,6 @@ const ContactForm = () => {
 };
 
 
-
-
-// LandingPage Component
 const LandingPage = () => {
 
   return (
@@ -358,7 +356,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* About Section */}
       <section id="about" className="p-4 md:p-10">
         <h1 className="text-4xl sm:text-6xl lg:text-5xl text-center tracking-wide bg-gradient-to-r from-orange-500 to-red-800 text-transparent bg-clip-text">
           About Us
@@ -391,8 +388,6 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
-
-      {/* Contact Section */}
       <section id="contact" className="bg-gray-100 p-4 md:p-10">
         <h1 className="text-4xl sm:text-6xl lg:text-5xl text-center tracking-wide bg-gradient-to-r from-orange-500 to-red-800 text-transparent bg-clip-text">
           Contact Us
@@ -429,106 +424,11 @@ const LandingPage = () => {
           <ContactForm />
 
         </div>
-
-
-        {/* <form className="mt-6 max-w-md mx-auto">
-          <input type="text" placeholder="Your Name" className="w-full p-2 mb-4 border rounded" required />
-          <input type="email" placeholder="Your Email" className="w-full p-2 mb-4 border rounded" required />
-          <textarea placeholder="Your Message" className="w-full p-2 mb-4 border rounded" required></textarea>
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
-            Send Message
-          </button>
-        </form> */}
       </section>
 
-      {/* Footer Section */}
-      <footer className="bg-gray-800 text-white p-4 text-center">
-        <p>&copy; {new Date().getFullYear()} My Project. All rights reserved.</p>
-      </footer>
+     <Footer />
     </div>
   );
 };
 
 export default LandingPage;
-
-
-// import React from 'react';
-
-
-// // LandingPage Component
-// const LandingPage = () => {
-//   return (
-//     <div className="flex flex-col min-h-screen">
-//       {/* Header Section */}
-//       <header className="bg-gray-800 text-white p-4">
-//         <h1 className="text-3xl font-bold">My Project</h1>
-//         <nav>
-//           <ul className="flex space-x-4">
-//             <li><a href="#features" className="hover:underline">Features</a></li>
-//             <li><a href="#about" className="hover:underline">About</a></li>
-//             <li><a href="#contact" className="hover:underline">Contact</a></li>
-//           </ul>
-//         </nav>
-//       </header>
-
-//       {/* Hero Section */}
-//       <section className="flex-grow flex items-center justify-center bg-blue-600 text-white p-10">
-//         <div className="text-center">
-//           <h2 className="text-4xl font-semibold">Welcome to My Project</h2>
-//           <p className="mt-4">Build amazing things with our platform. Start your journey today!</p>
-//           <a href="#features" className="mt-6 inline-block bg-white text-blue-600 py-2 px-4 rounded shadow">
-//             Get Started
-//           </a>
-//         </div>
-//       </section>
-
-//       {/* Features Section */}
-//       <section id="features" className="p-10 bg-gray-100">
-//         <h3 className="text-2xl font-bold text-center">Features</h3>
-//         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-//           <div className="bg-white p-6 rounded shadow">
-//             <h4 className="font-semibold">Feature 1</h4>
-//             <p>Description of feature 1.</p>
-//           </div>
-//           <div className="bg-white p-6 rounded shadow">
-//             <h4 className="font-semibold">Feature 2</h4>
-//             <p>Description of feature 2.</p>
-//           </div>
-//           <div className="bg-white p-6 rounded shadow">
-//             <h4 className="font-semibold">Feature 3</h4>
-//             <p>Description of feature 3.</p>
-//           </div>
-//         </div>
-//       </section>
-
-//       {/* About Section */}
-//       <section id="about" className="p-10">
-//         <h3 className="text-2xl font-bold text-center">About Us</h3>
-//         <p className="mt-4 text-center">
-//           We are dedicated to providing the best services to our users.
-//           Our mission is to empower individuals and businesses to achieve more.
-//         </p>
-//       </section>
-
-//       {/* Contact Section */}
-//       <section id="contact" className="p-10 bg-gray-100">
-//         <h3 className="text-2xl font-bold text-center">Contact Us</h3>
-//         <form className="mt-6 max-w-md mx-auto">
-//           <input type="text" placeholder="Your Name" className="w-full p-2 mb-4 border rounded" required />
-//           <input type="email" placeholder="Your Email" className="w-full p-2 mb-4 border rounded" required />
-//           <textarea placeholder="Your Message" className="w-full p-2 mb-4 border rounded" required></textarea>
-//           <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
-//             Send Message
-//           </button>
-//         </form>
-//       </section>
-
-//       {/* Footer Section */}
-//       <footer className="bg-gray-800 text-white p-4 text-center">
-//         <p>&copy; {new Date().getFullYear()} My Project. All rights reserved.</p>
-//       </footer>
-//     </div>
-//   );
-// };
-
-// export default LandingPage;

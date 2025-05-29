@@ -1,7 +1,7 @@
 from rest_framework import generics, status, viewsets, permissions
 from rest_framework.response import Response
 from .models import StudentProfile, AlumniProfile, StaffProfile, CompanyProfile, CustomUser , Connection , Notification
-from .serializers import StudentProfileSerializer, AlumniProfileSerializer,ProfileSerializer_Alumni ,StaffProfileSerializer, CompanyProfileSerializer , UserSerializer, MentorSearchSerializer, AlumniProfileUpdateSerializer , StudentProfileUpdateSerializer, ConnectionSerializer, CompanyProfileUpdateSerializer , NotificationSerializer ,NotificationListSerializer
+from .serializers import StudentProfileSerializer, AlumniProfileSerializer, CompanyVerifySerializer,ProfileSerializer_Alumni ,StaffProfileSerializer, CompanyProfileSerializer , UserSerializer, MentorSearchSerializer, AlumniProfileUpdateSerializer , StudentProfileUpdateSerializer, ConnectionSerializer, CompanyProfileUpdateSerializer , NotificationSerializer ,NotificationListSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 import pandas as pd
@@ -19,8 +19,11 @@ from django.views import View
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
+from django.db import transaction, connections
 from django.core.exceptions import ObjectDoesNotExist
 from .notifications import create_notification
+from .permission import IsSuperUser
+from events.models import Event
 
 logger = logging.getLogger(__name__)
 
@@ -33,19 +36,15 @@ Staff_mocked_Data ="users/Mocked_Data/Staff_mocked_Data.xlsx"
 staff_df=pd.read_excel(Staff_mocked_Data, header=5)
 
 def is_user_AstuStudent(user_email, student_id):
-    email_check = not df[df['Email'] == user_email].empty
-    student_id_check = not df[df['ID'] == student_id].empty
-    return email_check and student_id_check
-def is_user_AstuAlumni(field_of_study, student_id):
-    field_of_study = not alumni_df[alumni_df['Program'] == field_of_study].empty
-    student_id_check = not alumni_df[alumni_df['Id Number'] == student_id].empty
-    
-    return field_of_study and student_id_check
-def is_user_AstuStaff(staff_email, qualification):
-    staff_email_exists = not staff_df[staff_df['Email'] == staff_email].empty
-    staff_qualification_exists = not staff_df[staff_df['Qualification'] == qualification].empty
-    return staff_qualification_exists and staff_email_exists
+    matched_row = df[(df['Email'] == user_email) & (df['ID'] == student_id)]
+    return not matched_row.empty
 
+def is_user_AstuAlumni(field_of_study, student_id):
+    matched_row = alumni_df[(alumni_df['Program'] == field_of_study) & (alumni_df['Id Number'] == student_id)]
+    return not matched_row.empty
+def is_user_AstuStaff(staff_email, qualification):
+    matched_row = staff_df[(staff_df['Email'] == staff_email) & (staff_df['Qualification'] == qualification)]
+    return not matched_row.empty
 
 class StudentProfileCreateView(generics.CreateAPIView):
     queryset = StudentProfile.objects.all()
@@ -443,8 +442,242 @@ class CompanyProfileView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+# User Management View
+class UserManagementView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    permission_classes = [IsAuthenticated] 
 
+    def list(self, request, *args, **kwargs):
+        users = self.get_queryset()
+        user_data = []
 
+        for user in users:
+            profile_data = {}
+
+            if user.usertype == 'Alumni':
+                profile = AlumniProfile.objects.filter(user=user).first()
+                if profile:
+                    profile_data = {
+                        'field_of_study': profile.field_of_study,
+                        'graduated_year': profile.graduated_year,
+                        'company': profile.company,
+                        'job_title': profile.job_title,     
+                        'student_id': profile.student_id,   
+                        'employment_status': profile.employment_status,  
+                        'professional_field': profile.professional_field,      
+                        'bio':profile.bio,
+                        'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+                        'work_history': profile.work_history,
+                        'phone_number': profile.phone_number,              
+                    }
+            elif user.usertype == 'student':
+                profile = StudentProfile.objects.filter(user=user).first()
+                if profile:
+                    profile_data = {    
+                        'student_id': profile.student_id,   
+                        'department': profile.department,  
+                        'admission_year': profile.admission_year, 
+                        'graduation_year': profile.graduation_year,
+                        'phone_number': profile.phone_number,  
+                        'achievements': profile.achievements,
+                        'activities': profile.activities,
+                        'bio': profile.bio,
+                        'interests': profile.interests,
+                        'professional_experiences': profile.professional_experiences,
+                        'profile_pic': profile.profile_pic.url if profile.profile_pic else None, 
+                        'skills': profile.skills,           
+                    }
+            elif user.usertype == 'company':
+                profile = CompanyProfile.objects.filter(user=user).first()
+                if profile:
+                    profile_data = {
+                        'company_name': profile.company_name,
+                        'company_address': profile.company_address,
+                        'company_city': profile.company_city,
+                        'postal_code': profile.postal_code,
+                        'company_country': profile.company_country,
+                        'contact_person_phone_number': profile.contact_person_phone_number,
+                        'website_url': profile.website_url,  
+                    }
+            elif user.usertype == 'staff':
+                profile = StaffProfile.objects.filter(user=user).first()
+                if profile:
+                    profile_data = {
+                        'position': profile.position,
+                        'department': profile.department,
+                        'qualifications': profile.qualifications,
+                        'expertise': profile.expertise,  
+                        'years_of_experience': profile.years_of_experience,  
+                    }
+            
+            user_data.append({
+                'user_id': user.id,
+                'email': user.email,
+                'full_name': user.full_name,
+                'is_active': user.is_active,
+                'usertype': user.usertype,
+                'is_verified': user.is_verified,
+                'profile': profile_data,
+                'joined_date': user.joined_date,
+            })
+
+        return Response(user_data, status=status.HTTP_200_OK)
+    
+# Company Verify View
+class CompanyVerifyView(generics.UpdateAPIView):
+    queryset = CustomUser.objects.filter(usertype='company')
+    permission_classes = [IsSuperUser]  
+    serializer_class =CompanyVerifySerializer
+
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            user = self.get_queryset().get(pk=pk)
+            user.is_verified = True
+            user.save()
+            return Response({"detail": "Company account verified successfully."}, status=status.HTTP_200_OK)
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+# User Delete View
+
+# class UserDeleteView(generics.DestroyAPIView):
+#     queryset = CustomUser.objects.all()
+#     permission_classes = [AllowAny]  
+
+#     @transaction.atomic
+#     def delete(self, request, pk, *args, **kwargs):
+#         try:
+#             user = self.get_queryset().get(pk=pk)
+#             # logging.error(f"Attempt to delete {user.id}")
+#             # logging.error(f"{user.usertype}")
+#             Event.objects.using('events_db').filter(created_by_id=user.id).delete()
+
+#             Notification.objects.using('default').filter(user_id=user.id).delete()
+
+            # if user.usertype == 'company':
+            #     CompanyProfile.objects.filter(user_id=user.id).delete()
+            # elif user.usertype == 'student':
+            #     StudentProfile.objects.filter(user=user).delete()
+            # elif user.usertype == 'alumni':
+            #     AlumniProfile.objects.filter(user=user).delete()
+            # elif user.usertype == 'staff':
+            #     StaffProfile.obj
+            # user.delete()
+#             return Response({"detail": "User and associated data deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+#         except CustomUser.DoesNotExist:
+#             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)      
+from django.db import transaction
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
+from django.db import connections
+import logging
+from .models import CustomUser, StudentProfile, AlumniProfile, StaffProfile, CompanyProfile, Connection, Notification
+from events.models import Event
+
+class UserDeleteView(generics.DestroyAPIView):
+    queryset = CustomUser.objects.all()
+    permission_classes = [IsSuperUser]
+    lookup_field = 'pk'
+
+    @transaction.atomic
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            user = self.get_object()
+            deleted_tables = []
+
+            # 1. Delete events from events_db
+            try:
+                with connections['events_db'].cursor() as cursor:
+                    cursor.execute("DELETE FROM events_table WHERE created_by_id = %s", [user.id])
+                    if cursor.rowcount > 0:
+                        deleted_tables.append("events_table")
+            except Exception as e:
+                if "doesn't exist" not in str(e):
+                    logging.error(f"Error deleting events: {str(e)}")
+                    return Response(
+                        {"detail": "Failed to delete user events."},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+
+            # 2. Delete notifications
+            try:
+                Notification.objects.filter(user_id=user.id).delete()
+                deleted_tables.append("notification")
+            except Exception as e:
+                logging.error(f"Error deleting notifications: {str(e)}")
+                return Response(
+                    {"detail": "Failed to delete notifications."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            # 3. Delete connections
+            try:
+                Connection.objects.filter(requester=user).delete()
+                Connection.objects.filter(requestee=user).delete()
+                deleted_tables.append("connections")
+            except Exception as e:
+                logging.error(f"Error deleting connections: {str(e)}")
+
+            # 4. Delete profile based on user type
+            try:
+                if user.usertype == 'company':
+                    CompanyProfile.objects.filter(user_id=user.id).delete()
+                    deleted_tables.append("company_profile")
+                elif user.usertype == 'student':
+                    StudentProfile.objects.filter(user_id=user.id).delete()
+                    deleted_tables.append("student_profile")
+                elif user.usertype == 'Alumni':
+                    AlumniProfile.objects.filter(user_id=user.id).delete()
+                    deleted_tables.append("alumni_profile")
+                elif user.usertype == 'staff':
+                    StaffProfile.objects.filter(user_id=user.id).delete()
+                    deleted_tables.append("staff_profile")
+            except Exception as e:
+                logging.error(f"Error deleting profile: {str(e)}")
+                return Response(
+                    {"detail": f"Failed to delete {user.usertype} profile."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            # 5. Finally delete the user
+            try:
+                with connections['default'].cursor() as cursor:
+                    cursor.execute("DELETE FROM users_customuser WHERE id = %s", [user.id])
+                    if cursor.rowcount == 1:
+                        deleted_tables.append("users_customuser")
+                        return Response(
+                            {
+                                "detail": "User and all related data deleted successfully.",
+                                "deleted_tables": deleted_tables
+                            },
+                            status=status.HTTP_204_NO_CONTENT
+                        )
+                    return Response(
+                        {"detail": "User not found or already deleted."},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            except Exception as e:
+                logging.error(f"Error deleting user: {str(e)}")
+                return Response(
+                    {"detail": "Failed to delete user."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"detail": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logging.error(f"Unexpected error: {str(e)}", exc_info=True)
+            return Response(
+                {"detail": "An unexpected error occurred during deletion."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
 User = get_user_model()
 
 class LoginView(APIView):
@@ -458,6 +691,9 @@ class LoginView(APIView):
         user = authenticate(request, username=email, password=password)
 
         if user is not None:
+            logging.error(f"User type {user.usertype} and IS Verified {user.is_verified}")
+            if user.usertype == 'company' and not user.is_verified:
+                return Response({'detail': 'Your account is pending for admin approval.'}, status=status.HTTP_403_FORBIDDEN)
             
             user.last_login = timezone.now()
             user.save(update_fields=['last_login'])
@@ -554,54 +790,78 @@ class UserSearchView(generics.ListAPIView):
 class ObtainTokenPairView(TokenObtainPairView):
     pass
 
+
 class MentorSearchView(generics.ListAPIView):
     serializer_class = MentorSearchSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
         search_term = self.request.query_params.get('name', None)
-        department = self.request.query_params.get('department', None)
+        queryset = User.objects.filter(
+            areas_of_interest__contains={"mentoring": True, "networking": True}
+        )
 
-        # Log the incoming request parameters
-        logging.info(f"Received search request with: search_term='{search_term}', department='{department}'")
+        if search_term:
+            # Apply search filters
+            search_filter = Q(full_name__icontains=search_term) | \
+                            Q(alumni_profile__field_of_study__icontains=search_term) | \
+                            Q(alumni_profile__professional_field__icontains=search_term) | \
+                            Q(alumni_profile__job_title__icontains=search_term) | \
+                            Q(alumni_profile__company__icontains=search_term) | \
+                            Q(staff_profile__position__icontains=search_term) | \
+                            Q(staff_profile__department__icontains=search_term) | \
+                            Q(staff_profile__expertise__icontains=search_term)
 
-        # Base queryset for searching Users
-        queryset = User.objects.all()
+            queryset = queryset.filter(search_filter ).distinct()
 
-        # If a department is provided, filter recommended users by that department
-        if department:
-            alumni_recommendations = User.objects.filter(
-                alumni_profile__field_of_study=department
-            )
-            staff_recommendations = User.objects.filter(
-                staff_profile__department=department
-            )            
-            recommended_users = alumni_recommendations | staff_recommendations
-
-            # Filter the main queryset to include only users from the specified department
-            queryset = queryset.filter(
-                Q(alumni_profile__field_of_study=department) | 
-                Q(staff_profile__department=department) |
-                Q(id__in=recommended_users.values_list('id', flat=True))
-            )
-
-        if search_term:            
-            queryset = queryset.filter(
-                Q(full_name__icontains=search_term) &
-                Q(areas_of_interest__contains=({"mentoring": True}))
-                
-            )
-
-        return queryset.distinct()  
+        return queryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)      
-        logging.info(f"Serialized data: {serializer.data}") 
+        serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+# View for Recommended user
+class RecommendedMentorView(generics.ListAPIView):
+    serializer_class = MentorSearchSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+        
+        logging.info(f"Fetching recommended mentors for user: {user.email}")
+
+        # Ensure the user is a student
+        if not hasattr(user, 'student_profile'):
+            logging.error("User is not a student. No recommendations available.")
+            return User.objects.none()  # Return an empty queryset if the user is not a student
+
+        # Get the student's department
+        student_department = user.student_profile.department
+        logging.debug(f"Student department: {student_department}")
+
+        # Start with filtering users interested in mentoring and networking
+        queryset = User.objects.filter(
+            areas_of_interest__contains={"mentoring": True, "networking": True}
+        )
+        queryset = queryset.filter(
+            Q(alumni_profile__field_of_study=student_department) | 
+            Q(staff_profile__department=student_department)
+        )
+
+        logging.debug(f"Recommended mentors queryset: {queryset.values('id', 'full_name', 'areas_of_interest')}")
+
+        return queryset.distinct()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        logging.info(f"Serialized data: {serializer.data}")
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
 class AlumniProfileView(generics.RetrieveAPIView):
     permission_classes = [AllowAny]  
     queryset = AlumniProfile.objects.select_related('user') 
@@ -625,7 +885,7 @@ class UserCountsView(View):
     def get(self, request):
         alumni_count = CustomUser.objects.filter(usertype='alumni').count()
         student_count = CustomUser.objects.filter(usertype='student').count()
-        faculty_count = CustomUser.objects.filter(usertype='faculty').count()
+        faculty_count = CustomUser.objects.filter(usertype='staff').count()
         companies_count = CustomUser.objects.filter(usertype='company').count()
 
         # Counting employed and unemployed alumni
@@ -634,7 +894,7 @@ class UserCountsView(View):
 
         data = {
             'students': student_count,
-            'faculty': faculty_count,
+            'staff': faculty_count,
             'alumni': alumni_count,
             'companies': companies_count,
             'employedAlumni': employed_alumni_count,
@@ -643,126 +903,6 @@ class UserCountsView(View):
         return JsonResponse(data)
 
 
-# class ConnectionViewSet(viewsets.ModelViewSet):
-#     queryset = Connection.objects.all()
-#     serializer_class = ConnectionSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def create(self, request):
-#         data = request.data
-#         requester = request.user
-#         requestee_id = data.get('requestee_id')
-
-#         logging.info(f"User {requester.id} is attempting to connect with user {requestee_id}")
-
-#         requestee_id = str(requestee_id).strip()
-        
-#         # Prevent sending a connection request to themselves
-#         if requestee_id == str(requester.id):
-#             logging.warning(f"User {requester.id} attempted to send a connection request to themselves.")
-#             return Response(
-#                 {"error": "You cannot send a connection request to yourself."},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-
-#         # Check if the connection request already exists
-#         existing_connection = Connection.objects.filter(
-#             requester=requester, requestee_id=requestee_id
-#         ).first()
-
-#         if existing_connection:
-#             return Response(
-#                 {"error": "Connection request already sent."},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-
-#         # Check if the reverse connection exists
-#         reverse_connection = Connection.objects.filter(
-#             requester_id=requestee_id, requestee=requester, status='pending'
-#         ).first()
-
-#         if reverse_connection:
-#             return Response(
-#                 {"error": "You have already received a connection request from this user."},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-
-#         # Create a new connection request
-#         connection = Connection.objects.create(requester=requester, requestee_id=requestee_id, status='pending')
-#         serializer = ConnectionSerializer(connection)
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-#     def accept(self, request, pk=None):
-#         requestee = request.user
-
-#         try:
-#             connection = Connection.objects.get(id=pk, requestee=requestee)
-#             connection.status = 'accepted'
-#             connection.save()
-
-#             return Response({"message": "Connection accepted."}, status=status.HTTP_200_OK)        
-#         except Exception as e:
-#             return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-#     def reject(self, request, pk=None):
-#         requestee = request.user
-
-#         try:
-#             # Fetch the connection object
-#             connection = Connection.objects.get(id=pk, requestee=requestee)
-
-#             connection.status = 'rejected'
-#             connection.save()
-#             return Response({"message": "Connection rejected."}, status=status.HTTP_200_OK)
-
-#         except Connection.DoesNotExist:
-#             return Response({"error": "Connection not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-#         except Exception as e:            
-#             return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-#     def cancel_reject(self, request, pk=None):
-#         requestee = request.user
-
-#         try:
-#             connection = Connection.objects.get(id=pk, requestee=requestee)          
-#             connection.status = 'pending' 
-#             connection.save()
-
-#             return Response({"message": "Rejection cancelled, connection is now pending."}, status=status.HTTP_200_OK)
-
-#         except Exception as e:
-#             return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    
-#     def list(self, request):
-#         connections = Connection.objects.filter(
-#             Q(requester=request.user) | Q(requestee=request.user)
-#         )
-
-#         connection_data = []
-#         for connection in connections:
-#             connection_info = ConnectionSerializer(connection).data
-            
-#             # Fetch requestee data
-#             requestee_info = UserSerializer(connection.requestee).data
-            
-#             # Fetch additional profile data based on requestee type
-#             if hasattr(connection.requestee, 'alumni_profile'):
-#                 profile_info = AlumniProfileUpdateSerializer(connection.requestee.alumni_profile).data
-#             elif hasattr(connection.requestee, 'student_profile'):
-#                 profile_info = StudentProfileUpdateSerializer(connection.requestee.student_profile).data
-#             elif hasattr(connection.requestee, 'company'):
-#                 profile_info = CompanyProfileSerializer(connection.requestee.company).data
-#             elif hasattr(connection.requestee, 'staff'):
-#                 profile_info = StaffProfileSerializer(connection.requestee.staff).data
-#             else:
-#                 profile_info = {}
-
-#             requestee_info['profile'] = profile_info
-#             connection_info['requestee'] = requestee_info
-            
-#             connection_data.append(connection_info)
-
-#         return Response(connection_data, status=status.HTTP_200_OK)
 
 class ConnectionViewSet(viewsets.ModelViewSet):
     queryset = Connection.objects.all()
@@ -963,7 +1103,12 @@ def forgot_password(request):
 
         if user.full_name != full_name or user.usertype != user_type:
             return JsonResponse({'error': 'Invalid input. Please check your data and try again.'}, status=400)
-
+        # Password Validation
+        if len(new_password) < 8 or not any(char.isdigit() for char in new_password) or \
+                not any(char.isalpha() for char in new_password) or \
+                not any(char in '!@#$%^&*()_+[]{}|;:,.<>?/' for char in new_password):
+            return JsonResponse({'error': 'Password must be at least 8 characters long and contain at least one letter, one number, and one special character.'}, status=400)
+        
         user.password = make_password(new_password)
         user.save()
         return JsonResponse({'message': 'Password reset successfully.'}, status=200)
