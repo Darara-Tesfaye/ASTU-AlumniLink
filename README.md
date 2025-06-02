@@ -27,17 +27,17 @@
         ✅ Event Management: Facilitate networking and career-related events for the ASTU community.
         ✅ Admin Panel: Oversee user management, posts, and system settings.
 🛠️ Technology Stack
-            Frontend
-                React.js: A powerful UI framework to build interactive user interfaces.
-                Tailwind CSS: A utility-first CSS framework for styling.
-                Axios: For making API calls.
-                React Router: For seamless navigation between components.
-            Backend
-                Django: A robust web framework for building backend services.
-                Django REST Framework: Simplifies API development.
-                MySQL: A reliable database solution.
-                JWT Authentication: Provides secure login mechanisms.
-                Django CORS Headers: Enables frontend-backend communication.
+        Frontend
+             React.js: A powerful UI framework to build interactive user interfaces.
+             Tailwind CSS: A utility-first CSS framework for styling.
+            Axios: For making API calls.
+            React Router: For seamless navigation between components.
+        Backend
+            Django: A robust web framework for building backend services.
+            Django REST Framework: Simplifies API development.
+            MySQL: A reliable database solution.
+            JWT Authentication: Provides secure login mechanisms.
+            Django CORS Headers: Enables frontend-backend communication.
 📂 Folder Structure
             ASTUALUMNILINK/  
             ├── frontend/     # Frontend codebase  
