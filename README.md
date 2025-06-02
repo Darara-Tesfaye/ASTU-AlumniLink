@@ -5,18 +5,18 @@
 
 📌 Table of Contents
 
-        Project Overview
-        Features
-        Technology Stack
-        Folder Structure
-        Installation Guide
-        Running the Project
-        API Endpoints
-        Contributors
-        License
+    🚀 Project Overview
+    🚀 Features
+    🚀Technology Stack
+    🚀Folder Structure
+    🚀Installation Guide
+    🚀Running the Project
+    🚀API Endpoints
+    🚀Contributors
+    🚀License
         
 📖 Project Overview
-    ASTUALUMNILINK is a dedicated platform aimed at fostering connections between alumni, students, faculty, and companies associated with Adama Science and Technology University (ASTU). It serves to:
+ 🚀ASTUALUMNILINK is a dedicated platform aimed at fostering connections between alumni, students, faculty, and companies associated with Adama Science and Technology University (ASTU). It serves to:
 
         ✅ Alumni: Mentor students and showcase job opportunities.
         ✅ Students: Seek mentorship, internships, and networking experiences.
@@ -33,13 +33,13 @@
         
 🛠️ Technology Stack
 
-        Frontend
+    🛠️  Frontend
              React.js: A powerful UI framework to build interactive user interfaces.
              Tailwind CSS: A utility-first CSS framework for styling.
             Axios: For making API calls.
             React Router: For seamless navigation between components.
             
-        Backend
+    🛠️ Backend
             Django: A robust web framework for building backend services.
             Django REST Framework: Simplifies API development.
             MySQL: A reliable database solution.
