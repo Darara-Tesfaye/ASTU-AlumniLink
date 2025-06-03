@@ -5,15 +5,15 @@
 
 📌 Table of Contents
 
-    🚀 Project Overview
-    🚀 Features
-    🚀Technology Stack
-    🚀Folder Structure
-    🚀Installation Guide
-    🚀Running the Project
-    🚀API Endpoints
-    🚀Contributors
-    🚀License
+     🚀 Project Overview
+     🚀 Features
+     🚀Technology Stack
+     🚀Folder Structure
+     🚀Installation Guide
+     🚀Running the Project
+     🚀API Endpoints
+     🚀Contributors
+     🚀License
         
 📖 Project Overview
  🚀ASTUALUMNILINK is a dedicated platform aimed at fostering connections between alumni, students, faculty, and companies associated with Adama Science and Technology University (ASTU). It serves to:
@@ -22,7 +22,7 @@
         ✅ Students: Seek mentorship, internships, and networking experiences.
         ✅ Faculty: Coordinate events and disseminate resources.
         ✅ Companies: Advertise job openings and scout talented individuals.
-        🔥 Features
+    🔥 Features
         ✅ User Authentication: Secure sign-up and sign-in for all users.
         ✅ Mentorship Program: Students can request guidance from alumni and faculty.
         ✅ Job & Internship Listings: Companies can post job vacancies, while students can apply effortlessly.
